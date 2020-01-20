@@ -554,15 +554,14 @@ Item {
         ToolStrip {
             visible:            (activeVehicle ? activeVehicle.guidedModeSupported : true) && !QGroundControl.videoManager.fullScreen
             id:                 toolStrip
-
             anchors.leftMargin: isInstrumentRight() ? _toolsMargin : undefined
             anchors.left:       isInstrumentRight() ? _mapAndVideo.left : undefined
             anchors.rightMargin:isInstrumentRight() ? undefined : ScreenTools.defaultFontPixelWidth
             anchors.right:      isInstrumentRight() ? undefined : _mapAndVideo.right
-            anchors.topMargin:  _toolsMargin
+            anchors.topMargin:  (parent.height/2)- (toolStrip.height/2)  //_toolsMargin + mainWindow.height / 2 -ToolStrip.height
             anchors.top:        parent.top
-            z:                  _mapAndVideo.z + 4
-            maxHeight:          parent.height - toolStrip.y + (_flightVideo.visible ? (_flightVideo.y - parent.height) : 0)
+            z:                  _mapAndVideo.z + 6
+            maxHeight:          parent.height - toolStrip.y// + (_flightVideo.visible ? (_flightVideo.y - parent.height) : 0)
 
             property bool _anyActionAvailable: _guidedController.showStartMission || _guidedController.showResumeMission || _guidedController.showChangeAlt || _guidedController.showLandAbort
             property var _actionModel: [
@@ -727,6 +726,8 @@ Item {
             color:              qgcPal.window
             visible:            false
         }
+
+
     }
 
     //-- Airspace Indicator

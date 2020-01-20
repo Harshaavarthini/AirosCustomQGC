@@ -165,7 +165,7 @@ APMFirmwarePlugin::APMFirmwarePlugin(void)
 
 }
 
-AutoPilotPlugin* APMFirmwarePlugin::autopilotPlugin(Vehicle* vehicle)
+CustomAutoPilotPlugin* APMFirmwarePlugin::autopilotPlugin(Vehicle* vehicle)
 {
     return new APMAutoPilotPlugin(vehicle, vehicle);
 }

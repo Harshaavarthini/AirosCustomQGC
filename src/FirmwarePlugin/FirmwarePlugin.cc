@@ -312,6 +312,18 @@ QString FirmwarePlugin::vehicleImageCompass(const Vehicle*) const
 
 const QVariantList &FirmwarePlugin::toolBarIndicators(const Vehicle*)
 {
+ #if defined (QGC_CUSTOM_BUILD)
+       if(_toolBarIndicatorList.size() == 0) {
+   #if defined(QGC_ENABLE_PAIRING)
+           _toolBarIndicatorList.append(QVariant::fromValue(QUrl::fromUserInput("qrc:/custom/PairingIndicator.qml")));
+   #endif
+           _toolBarIndicatorList.append(QVariant::fromValue(QUrl::fromUserInput("qrc:/custom/CustomGPSIndicator.qml")));
+           _toolBarIndicatorList.append(QVariant::fromValue(QUrl::fromUserInput("qrc:/toolbar/RCRSSIIndicator.qml")));
+           _toolBarIndicatorList.append(QVariant::fromValue(QUrl::fromUserInput("qrc:/toolbar/TelemetryRSSIIndicator.qml")));
+           _toolBarIndicatorList.append(QVariant::fromValue(QUrl::fromUserInput("qrc:/custom/CustomBatteryIndicator.qml")));
+
+       }
+#else
     //-- Default list of indicators for all vehicles.
     if(_toolBarIndicatorList.size() == 0) {
         _toolBarIndicatorList = QVariantList({
@@ -329,6 +341,7 @@ const QVariantList &FirmwarePlugin::toolBarIndicators(const Vehicle*)
             QVariant::fromValue(QUrl::fromUserInput("qrc:/toolbar/LinkIndicator.qml")),
         });
     }
+#endif
     return _toolBarIndicatorList;
 }
 
