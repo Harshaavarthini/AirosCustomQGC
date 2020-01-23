@@ -58,14 +58,6 @@ customQuickInterfaceSingletonFactory(QQmlEngine*, QJSEngine*)
 }
 
 
-//-----------------------------------------------------------------------------
-static QObject*
-customBatterySingletonFactory(QQmlEngine*, QJSEngine*)
-{
-    qCDebug(CustomLog) << "Creating CustomBattery instance";
-    CustomBattery* pIBat = new CustomBattery();
-    return pIBat;
-}
 
 //-----------------------------------------------------------------------------
 CustomOptions::CustomOptions(CustomPlugin*, QObject* parent)
@@ -111,7 +103,10 @@ CustomPlugin::setToolbox(QGCToolbox* toolbox)
 {
     QGCCorePlugin::setToolbox(toolbox);
     qmlRegisterSingletonType<CustomQuickInterface>("CustomQuickInterface", 1, 0, "CustomQuickInterface", customQuickInterfaceSingletonFactory);
-    qmlRegisterSingletonType<CustomBattery>("CustomBattery", 1, 0, "CustomBattery", customBatterySingletonFactory);
+   // qmlRegisterSingletonType<CustomBattery>("CustomBattery", 1, 0, "CustomBattery", customBatterySingletonFactory);
+     qmlRegisterType<CustomBattery>("QGroundControl.CustomBattery",1,0,"CustomBattery");
+//    qmlRegisterUncreatableType<CustomBattery> ("QGroundControl.CustomBattery", 1, 0, "CustomBattery", "Reference only");
+
 
     //-- Disable automatic logging
     toolbox->mavlinkLogManager()->setEnableAutoStart(false);
