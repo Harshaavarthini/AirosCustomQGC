@@ -78,6 +78,26 @@ Item {
     property var    battery2:           activeVehicle ? activeVehicle.battery2 : null
     property bool   hasSecondBattery:   battery2 && battery2.voltage.value !== -1
 
+    function getVerticalSpeed(){
+        var _temp="0.0"
+        var  _speed
+        if (activeVehicle){
+            if (activeVehicle.climbRate.value >0 ){
+                _temp= " +" + activeVehicle.climbRate.value.toFixed(1) + ' ' +activeVehicle.climbRate.units;
+            }else{
+
+                 _speed= activeVehicle.climbRate.value.toFixed(1) * -1;
+                 if (_speed > 0.1){
+                     _temp="-" + _speed  + ' ' +activeVehicle.climbRate.units;
+                 }else{
+                       _temp= " +" + activeVehicle.climbRate.value.toFixed(1) + ' ' +activeVehicle.climbRate.units;
+                 }
+
+
+            }
+        }
+        return _temp
+    }
 
 
     Timer {
@@ -274,13 +294,13 @@ Item {
     //-- Vehicle Indicator  ( Widget rect )
     Rectangle {
         id:                     vehicleIndicator
-        color:                  qgcPal.globalTheme === QGCPalette.Light ? Qt.rgba(1,1,1,0.95) : Qt.rgba(0,0,0,0.3)
-        width:                  vehicleStatusGrid.width  + (ScreenTools.defaultFontPixelWidth  * 5)
-        height:                 vehicleStatusGrid.height + (ScreenTools.defaultFontPixelHeight * 1.5)
+        color:                  qgcPal.globalTheme === QGCPalette.Light ? Qt.rgba(1,1,1,0.95) : Qt.rgba(0,0,0,0.2)//0.3
+        width:                  vehicleStatusGrid.width  + (ScreenTools.defaultFontPixelWidth  * 5)//5
+        height:                 vehicleStatusGrid.height + (ScreenTools.defaultFontPixelHeight * 1.2)//1.5
         radius:                 2
 
         anchors.top:    battTimeLoader.top
-        anchors.topMargin: ScreenTools.defaultFontPixelHeight * (_airspaceIndicatorVisible ? 3 : 1)
+        anchors.topMargin: ScreenTools.defaultFontPixelHeight * (_airspaceIndicatorVisible  ? 3 : 1.3)//
         anchors.horizontalCenter: parent.horizontalCenter
 
         //anchors.bottom:         parent.bottom
@@ -297,6 +317,7 @@ Item {
             rowSpacing:             ScreenTools.defaultFontPixelHeight * 0.5
             columns:                10
             anchors.centerIn:       parent
+              Layout.fillWidth:     false
 
 
             //--  Row
@@ -330,10 +351,10 @@ Item {
 
             }
             QGCLabel {
-                text:                   activeVehicle ? activeVehicle.climbRate.value.toFixed(1) + ' ' + activeVehicle.climbRate.units : "0.0"
+                text:                   getVerticalSpeed()//activeVehicle ? activeVehicle.climbRate.value.toFixed(1) + ' ' + activeVehicle.climbRate.units : " 0.0"
                 color:                  _indicatorsColor
                 font.pointSize:         ScreenTools.mediumFontPointSize
-                Layout.fillWidth:       true
+                Layout.fillWidth:       false //true
                 Layout.minimumWidth:    indicatorValueWidth
                 horizontalAlignment:    firstLabel.horizontalAlignment
             }

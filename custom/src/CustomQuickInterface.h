@@ -28,7 +28,7 @@ class CustomQuickInterface : public QObject
 public:
     CustomQuickInterface(QObject* parent = nullptr);
     ~CustomQuickInterface();
-    Q_PROPERTY(bool     showGimbalControl   READ showGimbalControl  WRITE setShowGimbalControl  NOTIFY showGimbalControlChanged)
+    Q_PROPERTY(bool     showGimbalControl   READ    showGimbalControl  WRITE setShowGimbalControl  NOTIFY showGimbalControlChanged)
     Q_PROPERTY(bool     showAttitudeWidget  READ    showAttitudeWidget WRITE setShowAttitudeWidget NOTIFY showAttitudeWidgetChanged)
 
     bool    showGimbalControl           () { return _showGimbalControl; }

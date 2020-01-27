@@ -61,7 +61,7 @@ Item {
             height: gpsCol.height  + ScreenTools.defaultFontPixelHeight * 2
             radius: ScreenTools.defaultFontPixelHeight * 0.5
             color:  qgcPal.window
-
+            border.color:   qgcPal.text
             Column {
                 id:                 gpsCol
                 spacing:            ScreenTools.defaultFontPixelHeight * 0.5
@@ -114,11 +114,11 @@ Item {
             fillMode:           Image.PreserveAspectFit
             opacity:            1//getGPSSignal() > 0 ? 1 : 0.5
         }
-        CustomSignalStrength {
+       /* CustomSignalStrength {
             anchors.verticalCenter: parent.verticalCenter
             size:                   parent.height * 0.75
             percent:                getGPSSignal()
-        }
+       }*/
     }
 
     MouseArea {

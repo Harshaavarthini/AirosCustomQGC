@@ -18,6 +18,8 @@
 #include <QColor>
 #include <QGeoPositionInfo>
 #include <QGeoPositionInfoSource>
+#include <QSettings>
+
 
 
 typedef uint8_t(*mapFn_t)(uint16_t, uint16_t, uint16_t);
@@ -75,28 +77,34 @@ class CustomBattery:public QObject
 public:
     CustomBattery(QObject* parent = nullptr);
     ~CustomBattery();
-    Q_PROPERTY(Vehicle*                     vehicle       READ vehicle        WRITE setvehicle    NOTIFY setvehicleChanged)
-    Q_PROPERTY(VehicleBatteryFactGroup*     batt          READ batt           WRITE setbatt       NOTIFY setbattChanged)
-    Q_PROPERTY(double                          estimate    READ estimate                           NOTIFY setestimateChanged  )
-    Q_PROPERTY(double                       cellVoltage READ cellVoltage                        NOTIFY cellVoltageChanged   )
-    Q_PROPERTY(int                          estimateLevel READ estimateLevel                    NOTIFY estimateLevelChanged  )
-    Q_PROPERTY(int                          cellNumber  READ cellNumber     WRITE setCellNumber NOTIFY setCellNumberChanged    )
+    Q_PROPERTY(Vehicle*                     vehicle       READ vehicle        WRITE setvehicle    NOTIFY vehicleChanged)
+    Q_PROPERTY(VehicleBatteryFactGroup*     batt          READ batt           WRITE setbatt       NOTIFY battChanged)
+    Q_PROPERTY(int                          cellNumber    READ cellNumber     WRITE setCellNumber NOTIFY CellNumberChanged    )
+    Q_PROPERTY(bool                         showFeautures  READ showFeautures WRITE setShowFeautures NOTIFY showFeauturesChanged)
 
+    Q_PROPERTY(double                       timeEstimate      READ timeEstimate                    NOTIFY timeEstimateChanged  )
+    Q_PROPERTY(double                       cellVoltage   READ cellVoltage                        NOTIFY cellVoltageChanged   )
+    Q_PROPERTY(int                          levelEstimate READ levelEstimate                      NOTIFY estimateLevelChanged  )
 
+//Property functions
     Vehicle*                 vehicle () { return _vehicle; }
-    VehicleBatteryFactGroup* batt () { return _batt; }
-
     void    setvehicle        (Vehicle* set);
+
+    VehicleBatteryFactGroup* batt () { return _batt; }
     void    setbatt       (VehicleBatteryFactGroup* set);
-
-    double  estimate();
-    int  estimateLevel();
-
-    double  cellVoltage();
-
 
     int    cellNumber   () { return _CellNumber; }
     void   setCellNumber( int set );
+
+    bool  showFeautures() {return  _showFeautures;}
+    void setShowFeautures (bool set);
+
+    double  timeEstimate();
+
+    double  cellVoltage();
+
+    int  levelEstimate();
+
 
 
 
@@ -105,13 +113,14 @@ public:
 
 
 signals:
-    void    setidControltChanged    ();
-    void    setvehicleChanged ();
-    void    setbattChanged();
-    void    setCellNumberChanged();
-    void    setestimateChanged();
+    void    vehicleChanged ();
+    void    battChanged();
+    void    CellNumberChanged();
+    void    showFeauturesChanged();
+    void    timeEstimateChanged();
     void    cellVoltageChanged();
     void    estimateLevelChanged();
+
 
 
 private:
@@ -122,6 +131,7 @@ private:
     int _CellNumber;
     double _CellVoltage;
     int _estimateLevel;
+    bool _showFeautures;
 
     uint16_t minVoltage;
     uint16_t maxVoltage;

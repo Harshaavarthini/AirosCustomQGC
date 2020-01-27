@@ -42,7 +42,7 @@ Item {
     }
 
     CustomBattery {
-       id: _custombattery
+       id: customBattTime
        batt: activeVehicle.battery
        cellNumber: activeVehicle.battery ? activeVehicle.battery.cellCount.value : 0
 
@@ -51,8 +51,8 @@ Item {
 
 
     function getTimeBatteryEstimate (){
-           if (custombattery.batt && _custombattery){
-            return _custombattery.estimate
+           if (custombattery.batt && customBattTime){
+            return customBattTime.timeEstimate
         }else
         {
             return "--/--"
@@ -63,62 +63,37 @@ Item {
 
 
     function barColor(){
+        var _temp=qgcPal.colorGrey
         if (battery1){
             if(battery1.percentRemaining.value >=70){
-
-                return qgcPal.colorGreen;
+                _temp=qgcPal.colorGreen;
             }
             if(battery1.percentRemaining.value <70 && activeVehicle.battery.percentRemaining.value >30){
-
-                return qgcPal.colorOrange;
+                _temp= qgcPal.colorOrange;
             }
             if(battery1.percentRemaining.value <=30  ){
-
-                return qgcPal.colorRed;
+                _temp= qgcPal.colorRed;
             }
 
         }
-        return qgcPal.colorRed;
+        return _temp;
 
     }
 
-   /*
-    function barGreen(){
-        if(activeVehicle.battery.percentRemaining.value >=70){
-            timeEstimate=estimateBattery()
-            return true;
-        }
-        return false;
-    }
 
-    function barOrange(){
-        if(activeVehicle.battery.percentRemaining.value <70 && activeVehicle.battery.percentRemaining.value >30 ){
-            timeEstimate=estimateBattery()
-            return true;
-        }
-        return false;
-    }
 
-    function barRed(){
-        if(activeVehicle.battery.percentRemaining.value <=30  ){
-            timeEstimate=estimateBattery()
-            return true;
-        }
-        return false;
-    }
-*/
 
 
     function barLen(){
-        //timeEstimate=getTimeBatteryEstimate
         return battery1.percentRemaining.value * (mainWindow.width/100);
 
     }
 
+
     function getTimeEstimate(){
-        if (battery1.percentRemaining.value >0.1 && _custombattery.batt ){
-            if (_custombattery.estimate == -1){return "--/--"}
-          return secondsToHHMMSS(_custombattery.estimate)
+        if (battery1.percentRemaining.value >0.1 && customBattTime.batt ){
+            if (customBattTime.timeEstimate === -1){return "--/--"}
+          return secondsToHHMMSS(customBattTime.timeEstimate)
         }else {
             return "--/--"
         }
@@ -139,7 +114,7 @@ Item {
             }
 
             Rectangle {
-                color: qgcPal.globalTheme === QGCPalette.Light ? Qt.rgba(1,1,1,0.95) : Qt.rgba(0,0,0,0)
+                color: qgcPal.globalTheme === QGCPalette.Light ? Qt.rgba(1,1,1,0.95) : Qt.rgba(0,0,0,0.6)
                 width:                  time.width
                 height:                 time.height
                 radius: 5
@@ -147,6 +122,7 @@ Item {
                 anchors.rightMargin: 0
                 anchors.top: bar.bottom
                 anchors.topMargin: 0
+
                 QGCLabel {
                     id: time
                     text:getTimeEstimate()
