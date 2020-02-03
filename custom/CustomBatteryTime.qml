@@ -18,17 +18,39 @@ import QGroundControl.Controls              1.0
 import QGroundControl.MultiVehicleManager   1.0
 import QGroundControl.ScreenTools           1.0
 import QGroundControl.Palette               1.0
-import QGroundControl.FactSystem    1.0
-import QGroundControl.FactControls  1.0
-import QGroundControl.CustomBattery 1.0
+import QGroundControl.FactSystem            1.0
+import QGroundControl.FactControls          1.0
+import QGroundControl.CustomBattery         1.0
+import QGroundControl.FactSystem            1.0
+import QGroundControl.FactControls          1.0
+
 
 
 Item {
 
-    id:                     _root
+    FactPanelController {
+        id:         controller
+    }
+
+    id:             _CustomBattery
     property var    battery1:           activeVehicle ? activeVehicle.battery  : null
     property var    battery2:           activeVehicle ? activeVehicle.battery2 : null
     property bool   hasSecondBattery:   battery2 && battery2.voltage.value !== -1
+    property bool   batt1ParamsAvailable
+    property bool   batt2ParamsAvailable
+    property Fact   battCapacity
+
+
+    Connections {
+        target: QGroundControl.multiVehicleManager.activeVehicle
+        onConnectionLostChanged: {
+
+        }
+        onActiveChanged: {
+       }
+
+
+    }
 
     function secondsToHHMMSS(timeS) {
         var sec_num = parseInt(timeS, 10);
@@ -38,75 +60,110 @@ Item {
         if (hours   < 10) {hours   = "0"+hours;}
         if (minutes < 10) {minutes = "0"+minutes;}
         if (seconds < 10) {seconds = "0"+seconds;}
-        return minutes+':'+seconds;
-    }
-
-    CustomBattery {
-       id: customBattTime
-       batt: activeVehicle.battery
-       cellNumber: activeVehicle.battery ? activeVehicle.battery.cellCount.value : 0
-
+        return hours+":"+ minutes+':'+seconds;
     }
 
 
 
-    function getTimeBatteryEstimate (){
-           if (custombattery.batt && customBattTime){
-            return customBattTime.timeEstimate
-        }else
-        {
-            return "--/--"
-        }
-    }
+    //-----------------------------------------------------------------------
+        function getBatteryColor(battery) {
+            if(battery &&  !CustomBattery.showFeatures) {
+                var _temp=qgcPal.colorGrey
+                if(battery.percentRemaining.value >= 70) {
+                    _temp= qgcPal.colorGreen
+                }
+                if(battery.percentRemaining.value < 70 && battery.percentRemaining.value > 30) {
+                    _temp= qgcPal.colorOrange
+                }
+                if(battery.percentRemaining.value <=30) {
+                    _temp= qgcPal.colorRed
+                }
+            }else{
+                if(battery && CustomBattery.showFeatures) {
+                    CustomBattery.batt=battery
+                    if(CustomBattery.levelEstimate >= 70) {
+                        _temp=qgcPal.colorGreen
+                    }
+                    if(CustomBattery.levelEstimate < 70 && CustomBattery.levelEstimate > 30) {
+                        _temp=qgcPal.colorOrange
+                    }
+                    if(CustomBattery.levelEstimate <=30) {
+                        _temp= qgcPal.colorRed
+                    }
+                }
 
 
-
-
-    function barColor(){
-        var _temp=qgcPal.colorGrey
-        if (battery1){
-            if(battery1.percentRemaining.value >=70){
-                _temp=qgcPal.colorGreen;
             }
-            if(battery1.percentRemaining.value <70 && activeVehicle.battery.percentRemaining.value >30){
-                _temp= qgcPal.colorOrange;
-            }
-            if(battery1.percentRemaining.value <=30  ){
-                _temp= qgcPal.colorRed;
-            }
-
-        }
-        return _temp;
-
-    }
+            return _temp;
 
 
-
-
-
-    function barLen(){
-        return battery1.percentRemaining.value * (mainWindow.width/100);
-
-    }
-
-
-    function getTimeEstimate(){
-        if (battery1.percentRemaining.value >0.1 && customBattTime.batt ){
-            if (customBattTime.timeEstimate === -1){return "--/--"}
-          return secondsToHHMMSS(customBattTime.timeEstimate)
-        }else {
-            return "--/--"
         }
 
+
+
+    //--------------------------------------------------------
+
+    function barLen(battery){
+        var _percent=10;
+        if (battery.voltage.value>0 && !CustomBattery.showFeatures){
+            _percent=battery.percentRemaining.value * (mainWindow.width/100);
+        }else{
+
+            if (battery.voltage.value>0 && CustomBattery.showFeatures){
+                CustomBattery.batt=battery
+                _percent=CustomBattery.levelEstimate * (mainWindow.width/100);
+
+            }
+
+
+        }
+        if (_communicationLost){
+            _percent=0
+        }
+
+        return _percent;
     }
+
+
+
+
+    //--------------------------------------------------------
+
+    function getTimeEstimate(battery){
+
+        if (battery.percentRemaining.value >0.1 && CustomBattery.showFeatures ){
+            if (CustomBattery.timeEstimate !== -1){
+                return secondsToHHMMSS(CustomBattery.timeEstimate)
+            }
+        }
+        if (battery.percentRemaining.value >0.1 && !CustomBattery.showFeatures ){
+                return battery.percentRemaining.value + "%"
+        }
+        return "--/--"
+
+    }
+
+
+
+    //---------------------------------------------------------------------
+
+      function getBatteryCapacity(){
+
+          batt1ParamsAvailable= controller.parameterExists(-1, "BATT_CAPACITY")
+          if (batt1ParamsAvailable){
+              battCapacity= controller.getParameterFact(-1, "BATT_CAPACITY", false /* reportMissing */)
+          }
+
+          if (battCapacity.value>0){ CustomBattery.cellCapacity=battCapacity.value }
+      }
 
 
         Rectangle {
             id: bar
             anchors.top:parent
-            width: barLen()
+            width: barLen(activeVehicle ? activeVehicle.battery : null)
             height: 5
-            color: barColor()
+            color: getBatteryColor(activeVehicle ? activeVehicle.battery : null)
             border.color: "black"
             border.width: 0.5
             radius: 1
@@ -125,7 +182,7 @@ Item {
 
                 QGCLabel {
                     id: time
-                    text:getTimeEstimate()
+                    text:getTimeEstimate(activeVehicle ? activeVehicle.battery : null)
                     font.pointSize:         ScreenTools.mediumFontPointSize
                 }
 

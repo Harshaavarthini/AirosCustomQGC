@@ -19,6 +19,7 @@
 #include "CustomQuickInterface.h"
 #include "CustomVideoManager.h"
 #include "CustomBattery.h"
+#include "QGroundControlQmlGlobal.h"
 
 #include "MultiVehicleManager.h"
 #include "QGCApplication.h"
@@ -57,6 +58,18 @@ customQuickInterfaceSingletonFactory(QQmlEngine*, QJSEngine*)
     return pIFace;
 }
 
+
+static QObject*
+customBatterySingletonFactory(QQmlEngine* engine, QJSEngine* scriptEngine)
+{
+    Q_UNUSED(engine)
+    Q_UNUSED(scriptEngine)
+
+    // We create this object as a QGCTool even though it isn't in the toolbox
+    CustomBattery* pBatt= new CustomBattery();
+
+    return pBatt;
+}
 
 
 //-----------------------------------------------------------------------------
@@ -103,9 +116,8 @@ CustomPlugin::setToolbox(QGCToolbox* toolbox)
 {
     QGCCorePlugin::setToolbox(toolbox);
     qmlRegisterSingletonType<CustomQuickInterface>("CustomQuickInterface", 1, 0, "CustomQuickInterface", customQuickInterfaceSingletonFactory);
-   // qmlRegisterSingletonType<CustomBattery>("CustomBattery", 1, 0, "CustomBattery", customBatterySingletonFactory);
-     qmlRegisterType<CustomBattery>("QGroundControl.CustomBattery",1,0,"CustomBattery");
-//    qmlRegisterUncreatableType<CustomBattery> ("QGroundControl.CustomBattery", 1, 0, "CustomBattery", "Reference only");
+    qmlRegisterSingletonType<CustomBattery>("QGroundControl.CustomBattery", 1, 0, "CustomBattery", customBatterySingletonFactory);
+   //  qmlRegisterType<CustomBattery>("QGroundControl.CustomBattery",1,0,"CustomBattery");
 
 
     //-- Disable automatic logging
@@ -113,6 +125,8 @@ CustomPlugin::setToolbox(QGCToolbox* toolbox)
     toolbox->mavlinkLogManager()->setEnableAutoUpload(false);
     connect(qgcApp()->toolbox()->corePlugin(), &QGCCorePlugin::showAdvancedUIChanged, this, &CustomPlugin::_advancedChanged);
 }
+
+
 
 //-----------------------------------------------------------------------------
 void

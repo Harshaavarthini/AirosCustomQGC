@@ -69,6 +69,9 @@ static inline uint8_t linear(uint16_t voltage, uint16_t minVoltage, uint16_t max
 }
 
 
+static int CellCapacity;
+
+
 
 class CustomBattery:public QObject
 {
@@ -77,12 +80,14 @@ class CustomBattery:public QObject
 public:
     CustomBattery(QObject* parent = nullptr);
     ~CustomBattery();
-    Q_PROPERTY(Vehicle*                     vehicle       READ vehicle        WRITE setvehicle    NOTIFY vehicleChanged)
-    Q_PROPERTY(VehicleBatteryFactGroup*     batt          READ batt           WRITE setbatt       NOTIFY battChanged)
-    Q_PROPERTY(int                          cellNumber    READ cellNumber     WRITE setCellNumber NOTIFY CellNumberChanged    )
-    Q_PROPERTY(bool                         showFeautures  READ showFeautures WRITE setShowFeautures NOTIFY showFeauturesChanged)
+    Q_PROPERTY(Vehicle*                     vehicle       READ vehicle        WRITE setvehicle      NOTIFY vehicleChanged)
+    Q_PROPERTY(VehicleBatteryFactGroup*     batt          READ batt           WRITE setbatt         NOTIFY battChanged)
+    Q_PROPERTY(int                          cellNumber    READ cellNumber     WRITE setCellNumber   NOTIFY cellNumberChanged    )
+    Q_PROPERTY(int                          cellCapacity  READ cellCapacity   WRITE setCellCapacity NOTIFY cellCapacityChanged)
+    Q_PROPERTY(int                          features      READ features       WRITE setFeatures     NOTIFY featuresChanged)
+    Q_PROPERTY(bool                         showFeatures  READ showFeatures   WRITE setShowFeatures NOTIFY showFeaturesChanged)
 
-    Q_PROPERTY(double                       timeEstimate      READ timeEstimate                    NOTIFY timeEstimateChanged  )
+    Q_PROPERTY(double                       timeEstimate  READ timeEstimate                        NOTIFY timeEstimateChanged  )
     Q_PROPERTY(double                       cellVoltage   READ cellVoltage                        NOTIFY cellVoltageChanged   )
     Q_PROPERTY(int                          levelEstimate READ levelEstimate                      NOTIFY estimateLevelChanged  )
 
@@ -96,8 +101,16 @@ public:
     int    cellNumber   () { return _CellNumber; }
     void   setCellNumber( int set );
 
-    bool  showFeautures() {return  _showFeautures;}
-    void setShowFeautures (bool set);
+    int    cellCapacity   () { return CellCapacity; }
+    void   setCellCapacity( int set );
+
+    int    features   () { return _features; }
+    void   setFeatures( int set );
+
+
+
+    bool  showFeatures() {return  _showFeatures;}
+    void setShowFeatures (bool set);
 
     double  timeEstimate();
 
@@ -115,8 +128,11 @@ public:
 signals:
     void    vehicleChanged ();
     void    battChanged();
-    void    CellNumberChanged();
-    void    showFeauturesChanged();
+    void    cellNumberChanged();
+    void    cellCapacityChanged();
+    void    featuresChanged();
+
+    void    showFeaturesChanged();
     void    timeEstimateChanged();
     void    cellVoltageChanged();
     void    estimateLevelChanged();
@@ -129,9 +145,11 @@ private:
     VehicleBatteryFactGroup* _batt=nullptr;
     double _estimate;
     int _CellNumber;
+    //int _CellCapacity;
     double _CellVoltage;
     int _estimateLevel;
-    bool _showFeautures;
+    int _features;
+    bool _showFeatures;
 
     uint16_t minVoltage;
     uint16_t maxVoltage;

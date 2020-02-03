@@ -16,9 +16,13 @@ import QtQuick.Layouts                      1.11
 import QGroundControl                       1.0
 import QGroundControl.Controls              1.0
 import QGroundControl.MultiVehicleManager   1.0
+import QGroundControl.Vehicle               1.0
+
 import QGroundControl.ScreenTools           1.0
 import QGroundControl.Palette               1.0
-import QGroundControl.CustomBattery 1.0
+import QGroundControl.CustomBattery         1.0
+import QGroundControl.FactSystem    1.0
+import QGroundControl.FactControls  1.0
 
 
 
@@ -35,14 +39,27 @@ Item {
     property bool   hasSecondBattery:   battery2 && battery2.voltage.value !== -1
     property bool   batteryFeatures
     property var    _cellModel:      ["1cell","2Cell","3Cell","4Cell","5Cell","6Cell"]
+    property var    _featModel:      ["APM","Lipo","LiHV"]
+    property bool  batt1ParamsAvailable
+    property bool  batt2ParamsAvailable
+    property Fact battCapacity
 
+    Connections {
+        target: QGroundControl.multiVehicleManager.activeVehicle
+        onConnectionLostChanged: {
 
-    CustomBattery {
-       id: customBattIndicator
-       batt: activeVehicle.battery
-       cellNumber: activeVehicle.battery ? activeVehicle.battery.cellCount.value : 0
+        }
+        onActiveChanged: {
+            checkBatteryParameter()
+
+        }
+
 
     }
+    FactPanelController {
+        id:         controller
+    }
+
 //-------------------------------------------------------------------
 // Looking for the lowestBattery
     function lowestBattery() {
@@ -64,7 +81,7 @@ Item {
             if(battery.percentRemaining.value >= 70) {
                 _temp= qgcPal.colorGreen
             }
-            if(battery.percentRemaining.value < 70 && battery1.percentRemaining.value > 30) {
+            if(battery.percentRemaining.value < 70 && battery.percentRemaining.value > 30) {
                 _temp= qgcPal.colorOrange
             }
             if(battery.percentRemaining.value <=30) {
@@ -77,14 +94,14 @@ Item {
 //--------------------------------------------------------------------
     function getAdvBatteryColor() {
         var _temp=qgcPal.colorGrey
-        if(customBattIndicator.batt) {
-            if(customBattIndicator.levelEstimate >= 70) {
+        if(CustomBattery.batt) {
+            if(CustomBattery.levelEstimate >= 70) {
                 _temp=qgcPal.colorGreen
             }
-            if(customBattIndicator.levelEstimate < 70 && customBattIndicator.levelEstimate > 30) {
+            if(CustomBattery.levelEstimate < 70 && CustomBattery.levelEstimate > 30) {
                 _temp=qgcPal.colorOrange
             }
-            if(customBattIndicator.levelEstimate <=30) {
+            if(CustomBattery.levelEstimate <=30) {
                 _temp= qgcPal.colorRed
             }
         }
@@ -111,8 +128,10 @@ Item {
 //---------------------------------------------------------------------
     function cellLevel(battery){
         var _temp="Na"
-         if (battery.voltage.value >=0 && customBattIndicator.batt){
-             _temp=customBattIndicator.levelEstimate + "%"
+         if (battery.voltage.value >=0 ){
+             CustomBattery.batt=battery;
+             CustomBattery.cellNumber= activeVehicle.battery ? activeVehicle.battery.cellCount.value : 0
+             _temp=CustomBattery.levelEstimate + "%"
 
          }
          return _temp
@@ -121,12 +140,29 @@ Item {
 //---------------------------------------------------------------------
     function cellVoltage(battery){
         var _temp="Na"
-         if (battery.voltage.value >=0 && customBattIndicator.batt){
-             var _num=Number(customBattIndicator.cellVoltage).toFixed(2)
+         if (battery.voltage.value >=0){
+             CustomBattery.batt=battery;
+             checkBatteryParameter()
+             CustomBattery.cellNumber= activeVehicle.battery ? activeVehicle.battery.cellCount.value : 0
+             var _num=Number(CustomBattery.cellVoltage).toFixed(2)
              _temp=_num + battery1.voltage.units
 
          }
          return _temp
+
+    }
+
+//---------------------------------------------------------------------
+
+    function checkBatteryParameter(){
+
+        batt1ParamsAvailable= controller.parameterExists(-1, "BATT_CAPACITY")
+        batt2ParamsAvailable=controller.parameterExists(-1, "BATT2_CAPACITY")
+        if (batt1ParamsAvailable){
+            battCapacity= controller.getParameterFact(-1, "BATT_CAPACITY", false /* reportMissing */)
+        }
+
+        if (battCapacity){ CustomBattery.cellCapacity=battCapacity.value }
 
     }
 
@@ -135,6 +171,8 @@ Item {
     // Popup window show Battery info
     Component {
         id: batteryInfo
+
+
 
         Rectangle {
             width:  battCol.width   + ScreenTools.defaultFontPixelWidth  * 7//3
@@ -203,37 +241,41 @@ Item {
                     QGCLabel { text: (battery1 && battery1.instantPower.value !== -1) ? (battery1.instantPower.valueString + " " + battery1.instantPower.units) : "N/A" }
 
                     QGCLabel { text: qsTr("Cell override Batt1:") }
+
                     QGCComboBox {
-                        //anchors.verticalCenter: parent.verticalCenter
-                        id: combo
+                        id: comboCell
                         font.pointSize:         ScreenTools.mediumFontPointSize
-                        currentIndex:           customBattIndicator.cellNumber-1
+                        currentIndex:           CustomBattery.cellNumber-1
                         sizeToContents:         true
                         model:                  _cellModel
 
 
                         onCurrentIndexChanged:{
-                            customBattIndicator.cellNumber=currentIndex+1
+                            CustomBattery.cellNumber=currentIndex+1
 
                      }
 
                     }
 
+                    QGCLabel { text: qsTr("Cell capacity:") }
+                    QGCLabel {text:battCapacity ?  battCapacity.valueString + battCapacity.units: "N/A" }
 
                     QGCLabel { text: qsTr("Advanced")}
-                    QGCSwitch {
-                        id: btnAdvanced
-                        enabled: true
-                        checked: customBattIndicator.showFeautures
+                    QGCComboBox {
+                        id: comboAdv
+                        font.pointSize:         ScreenTools.mediumFontPointSize
+                        currentIndex:           CustomBattery.features
+                        sizeToContents:         true
+                        model:                  _featModel
 
-                        onClicked: {
-                            if(checked) {
-                               customBattIndicator.showFeautures = 1
-                            } else {
-                                customBattIndicator.showFeautures = 0
-                            }
-                        }
+
+                        onCurrentIndexChanged:{
+                            CustomBattery.features=currentIndex
+
+                     }
+
                     }
+
 
 
 
@@ -292,7 +334,7 @@ Item {
             width:              height
             sourceSize.width:   width
             source:             "/qmlimages/Battery.svg"
-            color:              customBattIndicator.showFeautures? getAdvBatteryColor(): getBatteryColor(activeVehicle ? activeVehicle.battery : null)//qgcPal.text
+            color:              CustomBattery.showFeatures? getAdvBatteryColor(): getBatteryColor(activeVehicle ? activeVehicle.battery : null)//qgcPal.text
             fillMode:           Image.PreserveAspectFit
 
         }
@@ -302,7 +344,7 @@ Item {
             font.pointSize:         ScreenTools.mediumFontPointSize
             color:                  imagePercent.color
             anchors.top:            parent.top
-            visible:                customBattIndicator.showFeautures? false:true
+            visible:                CustomBattery.showFeatures? false:true
         }
         QGCLabel {
             id:                     labelLevel
@@ -311,7 +353,7 @@ Item {
             color:                  imagePercent.color
             //anchors.top:            parent.top
             anchors.verticalCenter: parent.verticalCenter
-            visible:                customBattIndicator.showFeautures
+            visible:                CustomBattery.showFeatures
         }
         QGCLabel {
             text:                   cellVoltage(battery1)
@@ -320,8 +362,14 @@ Item {
             color:                  labelLevel.color
             //anchors.top:            parent.top
             anchors.verticalCenter: parent.verticalCenter
-            visible:                customBattIndicator.showFeautures
+            visible:                CustomBattery.showFeatures
         }
+        onPositioningComplete:{
+            if (activeVehicle){
+                checkBatteryParameter()
+            }
+        }
+
 
 
     }
@@ -329,6 +377,7 @@ Item {
     MouseArea {
         anchors.fill:   parent
         onClicked: {
+            checkBatteryParameter()
             mainWindow.showPopUp(_root, batteryInfo)
         }
     }

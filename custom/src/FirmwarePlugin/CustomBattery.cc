@@ -14,7 +14,8 @@ QGC_LOGGING_CATEGORY(CustomBatteryLog, "CustomBatteryLog")
 
 static const char* kGroupName       = "CustomBatterySettings";
 static const char* kCellNumber      = "cellNumber";
-static const char* kshowFeautures      = "showFeautures";
+static const char* kshowFeatures      = "showFeatures";
+static const char* kFeatures      = "Features";
 
 
 
@@ -27,7 +28,8 @@ CustomBattery::CustomBattery(QObject* parent)
     QSettings settings;
     settings.beginGroup(kGroupName);
     _CellNumber = settings.value(kCellNumber, 1).toInt();
-    _showFeautures= settings.value(kshowFeautures,0).toBool();
+    _showFeatures= settings.value(kshowFeatures,0).toBool();
+    _features= settings.value(kshowFeatures,0).toBool();
 
 }
 
@@ -63,13 +65,13 @@ void CustomBattery::setbatt(VehicleBatteryFactGroup* set)
 
 //-----------------------------------------------------------------------------
 
-void CustomBattery::setShowFeautures(bool set){
-    if (_showFeautures!=set){
-        _showFeautures=set;
+void CustomBattery::setShowFeatures(bool set){
+    if (_showFeatures!=set){
+        _showFeatures=set;
         QSettings settings;
         settings.beginGroup(kGroupName);
-        settings.setValue(kshowFeautures,set);
-        emit showFeauturesChanged();
+        settings.setValue(kshowFeatures,set);
+        emit showFeaturesChanged();
      }
 
 }
@@ -84,9 +86,33 @@ void CustomBattery::setCellNumber(int set){
         QSettings settings;
         settings.beginGroup(kGroupName);
         settings.setValue(kCellNumber,set);
-        emit CellNumberChanged();
+        emit cellNumberChanged();
     }
 }
+
+void CustomBattery::setFeatures(int set){
+    if (_features!=set ){
+        _features=set;
+        QSettings settings;
+        settings.beginGroup(kGroupName);
+        settings.setValue(kFeatures,set);
+        _features>0 ? setShowFeatures(true): setShowFeatures(false);
+
+        emit cellNumberChanged();
+    }
+
+}
+
+//-----------------------------------------------------------------------------
+
+void CustomBattery::setCellCapacity(int set){
+
+    if (CellCapacity!=set && set > 0){
+        CellCapacity=set;
+        emit cellCapacityChanged();
+    }
+}
+
 
 //-----------------------------------------------------------------------------
 
@@ -96,16 +122,17 @@ double CustomBattery::timeEstimate()
     double current,mahConsumed,ibat,k;
     double time=0;
 
-    if ( _batt==nullptr) {
+    if ( _batt==nullptr || CellCapacity<=0) {
         return -1;
     }
     mahConsumed =_batt->mahConsumed()->rawValue().toDouble();
     current= _batt->current()->rawValue().toDouble();
-    ibat=(5200-mahConsumed)*20;
-    k=60/2;
-    if (current>0 && mahConsumed>50){
+    ibat=(CellCapacity-mahConsumed)*20;
+    k=(60/20);
+    if (current>0 && mahConsumed>0){
 
-        time=ibat/(current*1000*k)*60*60;
+
+        time=((ibat/(current*1000))*k)*60;
          emit timeEstimateChanged();
         return time;
 
@@ -121,20 +148,31 @@ double CustomBattery::timeEstimate()
 //-----------------------------------------------------------------------------
 
 double CustomBattery::cellVoltage(){
+     double voltage;
 
-    double voltage=_batt->voltage()->rawValue().toDouble();
-    if (voltage>LIPOMIM && _CellNumber>0){
+    if (_batt){
+          voltage=_batt->voltage()->rawValue().toDouble();
+          if (voltage>LIPOMIM && _CellNumber>0){
 
-         double var=voltage/_CellNumber;
-         int value = (int)(var * 100 );
-         emit cellVoltageChanged();
-         return (double)value / 100;
+               double var=voltage/_CellNumber;
+               int value = (int)(var * 100 );
+               emit cellVoltageChanged();
+               return (double)value / 100;
 
-    }else
-    {
-        emit cellVoltageChanged();
-        return -1;
+          }else
+          {
+              emit cellVoltageChanged();
+              return -1;
+          }
+
+    }else{
+        return  -1;
     }
+
+
+
+
+
 
 
 }
