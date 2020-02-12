@@ -799,6 +799,17 @@ Item {
         }
     }
 
+
+    //-------------------------------------------------------------------------
+    //-- Object Avoidance VideoSurface
+     Loader {
+        id:                     objectavoidanceVideo
+        visible:                false
+        source:                 "/custom/CustomAvoidance.qml"
+
+    }
+
+
     //-------------------------------------------------------------------------
     //-- Connection Lost While Armed (Popup)
     Popup {
