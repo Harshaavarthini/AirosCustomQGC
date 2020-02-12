@@ -297,6 +297,9 @@ VideoReceiver::start()
     GstElement*     queue       = nullptr;
     GstElement*     decoder     = nullptr;
     GstElement*     queue1      = nullptr;
+    //new
+    GstElement*     rtpjitterbuffer      = nullptr;
+
 
     do {
         if ((_pipeline = gst_pipeline_new("receiver")) == nullptr) {
@@ -389,16 +392,23 @@ VideoReceiver::start()
             break;
         }
 
+        //new
+        if ((rtpjitterbuffer = gst_element_factory_make("rtpjitterbuffer", nullptr)) == nullptr) {
+            qCritical() << "VideoReceiver::start() failed. Error with gst_element_factory_make('rtpjitterbuffer') [1]";
+            break;
+        }
+
+
         if(isTaisyncUSB) {
             gst_bin_add_many(GST_BIN(_pipeline), dataSource, parser, _tee, queue, decoder, queue1, _videoSink, nullptr);
         } else {
-            gst_bin_add_many(GST_BIN(_pipeline), dataSource, demux, parser, _tee, queue, decoder, queue1, _videoSink, nullptr);
+            gst_bin_add_many(GST_BIN(_pipeline), dataSource,rtpjitterbuffer, demux, parser, _tee, queue, decoder, queue1, _videoSink, nullptr);
         }
         pipelineUp = true;
 
         if(isUdp264 || isUdp265) {
             // Link the pipeline in front of the tee
-            if(!gst_element_link_many(dataSource, demux, parser, _tee, queue, decoder, queue1, _videoSink, nullptr)) {
+            if(!gst_element_link_many(dataSource,rtpjitterbuffer, demux, parser, _tee, queue, decoder, queue1, _videoSink, nullptr)) {
                 qCritical() << "Unable to link UDP elements.";
                 break;
             }
@@ -426,7 +436,7 @@ VideoReceiver::start()
             }
         }
 
-        dataSource = demux = parser = queue = decoder = queue1 = nullptr;
+        dataSource = demux = parser = queue = decoder = queue1 =rtpjitterbuffer= nullptr;
 
         GstBus* bus = nullptr;
 
