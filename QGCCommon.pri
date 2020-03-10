@@ -1,11 +1,11 @@
-# -------------------------------------------------
-# QGroundControl - Micro Air Vehicle Groundstation
-# Please see our website at <http://qgroundcontrol.org>
-# Maintainer:
-# Lorenz Meier <lm@inf.ethz.ch>
-# (c) 2009-2019 QGroundControl Developers
-# License terms set in COPYING.md
-# -------------------------------------------------
+################################################################################
+#
+# (c) 2009-2020 QGROUNDCONTROL PROJECT <http://www.qgroundcontrol.org>
+#
+# QGroundControl is licensed according to the terms in the file
+# COPYING.md in the root of the source code directory.
+#
+################################################################################
 
 #
 # This file contains configuration settings which are common to both the QGC Application and
@@ -25,6 +25,7 @@ linux {
         DEFINES += QGC_ENABLE_NFC RW_SUPPORT
         DEFINES += QGC_GST_TAISYNC_ENABLED
         DEFINES += QGC_GST_MICROHARD_ENABLED 
+        DEFINES += QGC_ENABLE_MAVLINK_INSPECTOR
         linux-clang {
             message("Linux clang")
             QMAKE_CXXFLAGS += -Qunused-arguments -fcolor-diagnostics
@@ -49,9 +50,11 @@ linux {
         target.path = $$DESTDIR
         equals(ANDROID_TARGET_ARCH, armeabi-v7a)  {
             DEFINES += __androidArm32__
+            DEFINES += QGC_ENABLE_MAVLINK_INSPECTOR
             message("Android Arm 32 bit build")
         } else:equals(ANDROID_TARGET_ARCH, arm64-v8a)  {
             DEFINES += __androidArm64__
+            DEFINES += QGC_ENABLE_MAVLINK_INSPECTOR
             message("Android Arm 64 bit build")
         } else:equals(ANDROID_TARGET_ARCH, x86)  {
             CONFIG += Androidx86Build
@@ -71,6 +74,7 @@ linux {
         DEFINES += __STDC_LIMIT_MACROS
         DEFINES += QGC_GST_TAISYNC_ENABLED
         DEFINES += QGC_GST_MICROHARD_ENABLED 
+        DEFINES += QGC_ENABLE_MAVLINK_INSPECTOR
     } else {
         error("Unsupported Windows toolchain, only Visual Studio 2017 64 bit is supported")
     }
@@ -82,6 +86,7 @@ linux {
         CONFIG  -= x86
         DEFINES += QGC_GST_TAISYNC_ENABLED
         DEFINES += QGC_GST_MICROHARD_ENABLED 
+        DEFINES += QGC_ENABLE_MAVLINK_INSPECTOR
         equals(QT_MAJOR_VERSION, 5) | greaterThan(QT_MINOR_VERSION, 5) {
                 QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.7
         } else {

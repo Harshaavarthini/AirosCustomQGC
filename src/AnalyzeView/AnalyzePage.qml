@@ -1,6 +1,6 @@
 /****************************************************************************
  *
- *   (c) 2009-2016 QGROUNDCONTROL PROJECT <http://www.qgroundcontrol.org>
+ * (c) 2009-2020 QGROUNDCONTROL PROJECT <http://www.qgroundcontrol.org>
  *
  * QGroundControl is licensed according to the terms in the file
  * COPYING.md in the root of the source code directory.
@@ -63,15 +63,13 @@ Item {
         }
     }
 
-    QGCFlickable {
+    Item {
         id:                     mainContent
         anchors.topMargin:      ScreenTools.defaultFontPixelHeight
         anchors.top:            headerLoader.sourceComponent === null ? (headingColumn.visible ? headingColumn.bottom : parent.top) : headerLoader.bottom
         anchors.bottom:         parent.bottom
         anchors.left:           parent.left
         anchors.right:          parent.right
-        contentWidth:           pageLoader.x + pageLoader.item.width
-        contentHeight:          pageLoader.y + pageLoader.item.height
         clip:                   true
         Loader {
             id:                 pageLoader

@@ -1,6 +1,6 @@
 /****************************************************************************
  *
- *   (c) 2009-2016 QGROUNDCONTROL PROJECT <http://www.qgroundcontrol.org>
+ * (c) 2009-2020 QGROUNDCONTROL PROJECT <http://www.qgroundcontrol.org>
  *
  * QGroundControl is licensed according to the terms in the file
  * COPYING.md in the root of the source code directory.
@@ -15,8 +15,8 @@
 #include <QColor>
 
 /// @file
-///     @brief Core Plugin Interface for QGroundControl - Application Options
-///     @author Gus Grubba <mavlink@grubba.com>
+/// @brief Core Plugin Interface for QGroundControl - Application Options
+/// @author Gus Grubba <gus@auterion.com>
 
 class CustomInstrumentWidget;
 class QGCOptions : public QObject
@@ -90,13 +90,16 @@ public:
     /// Allows access to the full fly view window
     virtual QUrl    flyViewOverlay                  () const { return QUrl(); }
 
-    /// Provides an optional preflight checklist
-    virtual QUrl    preFlightChecklistUrl           () const { return QUrl(); }
+    /// Provides an optional, custom preflight checklist
+    virtual QUrl    preFlightChecklistUrl           () const { return QUrl::fromUserInput("qrc:/qml/PreFlightCheckList.qml"); }
 
-    /// Allows replacing the toolbar
+    /// Allows replacing the Main toolbar
     virtual QUrl    mainToolbarUrl                  () const;
+    /// Allows replacing the Plan View toolbar
     virtual QUrl    planToolbarUrl                  () const;
+    /// Allows replacing the toolbar Light Theme color
     virtual QColor  toolbarBackgroundLight          () const;
+    /// Allows replacing the toolbar Dark Theme color
     virtual QColor  toolbarBackgroundDark           () const;
     /// Allows replacing the Plan View toolbar container
     virtual QUrl    planToolbarIndicatorsUrl        () const;

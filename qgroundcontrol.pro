@@ -277,7 +277,6 @@ AndroidBuild || iOSBuild {
     QT += \
         printsupport \
         serialport \
-        charts \
 }
 
 contains(DEFINES, QGC_ENABLE_BLUETOOTH) {
@@ -573,7 +572,6 @@ HEADERS += \
     src/AnalyzeView/LogDownloadController.h \
     src/AnalyzeView/PX4LogParser.h \
     src/AnalyzeView/ULogParser.h \
-    src/AnalyzeView/MAVLinkInspectorController.h \
     src/AnalyzeView/MavlinkConsoleController.h \
     src/Audio/AudioOutput.h \
     src/Camera/QGCCameraControl.h \
@@ -589,7 +587,6 @@ HEADERS += \
     src/JsonHelper.h \
     src/KMLFileHelper.h \
     src/LogCompressor.h \
-    src/MG.h \
     src/MissionManager/CameraCalc.h \
     src/MissionManager/CameraSection.h \
     src/MissionManager/CameraSpec.h \
@@ -693,7 +690,6 @@ HEADERS += \
     src/comm/LinkManager.h \
     src/comm/LogReplayLink.h \
     src/comm/MAVLinkProtocol.h \
-    src/comm/ProtocolInterface.h \
     src/comm/QGCMAVLink.h \
     src/comm/TCPLink.h \
     src/comm/UDPLink.h \
@@ -815,7 +811,6 @@ SOURCES += \
     src/AnalyzeView/LogDownloadController.cc \
     src/AnalyzeView/PX4LogParser.cc \
     src/AnalyzeView/ULogParser.cc \
-    src/AnalyzeView/MAVLinkInspectorController.cc \
     src/AnalyzeView/MavlinkConsoleController.cc \
     src/Audio/AudioOutput.cc \
     src/Camera/QGCCameraControl.cc \
@@ -1231,6 +1226,17 @@ SOURCES += \
     src/FactSystem/SettingsFact.cc \
 
 #-------------------------------------------------------------------------------------
+# MAVLink Inspector
+contains (DEFINES, QGC_ENABLE_MAVLINK_INSPECTOR) {
+    HEADERS += \
+        src/AnalyzeView/MAVLinkInspectorController.h
+    SOURCES += \
+        src/AnalyzeView/MAVLinkInspectorController.cc
+    QT += \
+        charts
+}
+
+#-------------------------------------------------------------------------------------
 # Taisync
 contains (DEFINES, QGC_GST_TAISYNC_ENABLED) {
     INCLUDEPATH += \
@@ -1368,18 +1374,13 @@ INCLUDEPATH += \
     src/VideoStreaming
 
 HEADERS += \
-    src/VideoStreaming/VideoItem.h \
     src/VideoStreaming/VideoReceiver.h \
     src/VideoStreaming/VideoStreaming.h \
-    src/VideoStreaming/VideoSurface.h \
-    src/VideoStreaming/VideoSurface_p.h \
     src/VideoStreaming/SubtitleWriter.h \
 
 SOURCES += \
-    src/VideoStreaming/VideoItem.cc \
     src/VideoStreaming/VideoReceiver.cc \
     src/VideoStreaming/VideoStreaming.cc \
-    src/VideoStreaming/VideoSurface.cc \
     src/VideoStreaming/SubtitleWriter.cc \
 
 contains (CONFIG, DISABLE_VIDEOSTREAMING) {

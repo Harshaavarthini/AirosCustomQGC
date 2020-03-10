@@ -1,11 +1,11 @@
-# -------------------------------------------------
-# QGroundControl - Micro Air Vehicle Groundstation
-# Please see our website at <http://qgroundcontrol.org>
-# Maintainer:
-# Lorenz Meier <lm@inf.ethz.ch>
-# (c) 2009-2011 QGroundControl Developers
-# License terms set in COPYING.md
-# -------------------------------------------------
+################################################################################
+#
+# (c) 2009-2020 QGROUNDCONTROL PROJECT <http://www.qgroundcontrol.org>
+#
+# QGroundControl is licensed according to the terms in the file
+# COPYING.md in the root of the source code directory.
+#
+################################################################################
 
 QMAKE_POST_LINK += echo "Copying files"
 
@@ -115,6 +115,7 @@ LinuxBuild {
         libQt5Svg.so.5 \
         libQt5Test.so.5 \
         libQt5Widgets.so.5 \
+        libQt5X11Extras.so.5 \
         libQt5XcbQpa.so.5 \
         libQt5Xml.so.5 \
         libicui18n.so* \
