@@ -26,9 +26,17 @@ import QGroundControl.FactControls          1.0
 
 
 
+
 Item {
 
     id: _CustomAvoidance
+    property Fact proximitySettings
+    property bool  prxParamsAvailable
+    property int lastLevel
+    property int lastDistance
+    property string lastOrient
+
+    property color lastColor:qgcPal.colorGrey
 
 
     Connections {
@@ -37,10 +45,151 @@ Item {
 
         }
         onActiveChanged: {
-       }
+            checkProximityParameter()
+        }
 
 
     }
+
+
+    FactPanelController {
+        id: controller
+    }
+
+    //---------------------------------------------------------------------
+
+    function checkProximityParameter(){
+        /*prxParamsAvailable= controller.parameterExists(-1, "RNGFND1_ORIENT")
+            if (prxParamsAvailable){
+                proximitySettings=controller.getParameterFact(-1, "RNGFND1_ORIENT", true )
+            }
+            if(proximitySettings && proximitySettings.value>0) {
+                return true
+
+            }else{
+                return true
+            }*/
+
+        if (activeVehicle.objectApmAvoidance.size >0 ){
+            return true
+        }else{
+            return false
+        }
+
+    }
+
+
+    //-----------------------------------------------------------------------
+    function getAvoidColor(proximity) {
+
+        if(activeVehicle.objectApmAvoidance.size === proximity && checkProximityParameter()  && activeVehicle.objectApmAvoidance.orientation(proximity)===0  ) {
+            if(activeVehicle.objectApmAvoidance.level(proximity)===3) {
+                lastColor= qgcPal.colorGreen
+            }
+            if(activeVehicle.objectApmAvoidance.level(proximity)===2)  {
+                lastColor= qgcPal.colorOrange
+            }
+            if(activeVehicle.objectApmAvoidance.level(proximity)===1) {
+                lastColor= qgcPal.colorRed
+            }
+        }
+        return lastColor
+    }
+
+    //-----------------------------------------------------------------------
+
+    function getAvoidLevel(proximity) {
+        if(activeVehicle.objectApmAvoidance.size === proximity  && checkProximityParameter() )  {
+            if (activeVehicle.objectApmAvoidance.orientation(proximity)===0 ){
+                lastLevel=activeVehicle.objectApmAvoidance.level(proximity)
+                if (lastLevel=== 4){
+                    return 0
+                }
+            }
+        }
+        return lastLevel
+    }
+
+    //-----------------------------------------------------------------------
+
+    function getDistance(proximity) {
+        if(activeVehicle.objectApmAvoidance.size === proximity  && checkProximityParameter() )  {
+            if (activeVehicle.objectApmAvoidance.orientation(proximity)===0 ){
+                lastDistance=activeVehicle.objectApmAvoidance.distance(proximity)
+
+            }
+
+        }
+        return lastDistance
+    }
+
+
+
+    //-----------------------------------------------------------------------
+    /*
+        0	MAV_SENSOR_ROTATION_NONE	Roll: 0, Pitch: 0, Yaw: 0
+        1	MAV_SENSOR_ROTATION_YAW_45	Roll: 0, Pitch: 0, Yaw: 45
+        2	MAV_SENSOR_ROTATION_YAW_90	Roll: 0, Pitch: 0, Yaw: 90
+        3	MAV_SENSOR_ROTATION_YAW_135	Roll: 0, Pitch: 0, Yaw: 135
+        4	MAV_SENSOR_ROTATION_YAW_180	Roll: 0, Pitch: 0, Yaw: 180
+        5	MAV_SENSOR_ROTATION_YAW_225	Roll: 0, Pitch: 0, Yaw: 225
+        6	MAV_SENSOR_ROTATION_YAW_270	Roll: 0, Pitch: 0, Yaw: 270
+        7	MAV_SENSOR_ROTATION_YAW_315	Roll: 0, Pitch: 0, Yaw: 315
+        8	MAV_SENSOR_ROTATION_ROLL_180	Roll: 180, Pitch: 0, Yaw: 0
+        9	MAV_SENSOR_ROTATION_ROLL_180_YAW_45	Roll: 180, Pitch: 0, Yaw: 45
+        10	MAV_SENSOR_ROTATION_ROLL_180_YAW_90	Roll: 180, Pitch: 0, Yaw: 90
+        11	MAV_SENSOR_ROTATION_ROLL_180_YAW_135	Roll: 180, Pitch: 0, Yaw: 135
+        12	MAV_SENSOR_ROTATION_PITCH_180	Roll: 0, Pitch: 180, Yaw: 0
+        13	MAV_SENSOR_ROTATION_ROLL_180_YAW_225	Roll: 180, Pitch: 0, Yaw: 225
+        14	MAV_SENSOR_ROTATION_ROLL_180_YAW_270	Roll: 180, Pitch: 0, Yaw: 270
+        15	MAV_SENSOR_ROTATION_ROLL_180_YAW_315	Roll: 180, Pitch: 0, Yaw: 315
+        16	MAV_SENSOR_ROTATION_ROLL_90	Roll: 90, Pitch: 0, Yaw: 0
+        17	MAV_SENSOR_ROTATION_ROLL_90_YAW_45	Roll: 90, Pitch: 0, Yaw: 45
+        18	MAV_SENSOR_ROTATION_ROLL_90_YAW_90	Roll: 90, Pitch: 0, Yaw: 90
+        19	MAV_SENSOR_ROTATION_ROLL_90_YAW_135	Roll: 90, Pitch: 0, Yaw: 135
+        20	MAV_SENSOR_ROTATION_ROLL_270	Roll: 270, Pitch: 0, Yaw: 0
+        21	MAV_SENSOR_ROTATION_ROLL_270_YAW_45	Roll: 270, Pitch: 0, Yaw: 45
+        22	MAV_SENSOR_ROTATION_ROLL_270_YAW_90	Roll: 270, Pitch: 0, Yaw: 90
+        23	MAV_SENSOR_ROTATION_ROLL_270_YAW_135	Roll: 270, Pitch: 0, Yaw: 135
+        24	MAV_SENSOR_ROTATION_PITCH_90	Roll: 0, Pitch: 90, Yaw: 0
+        25	MAV_SENSOR_ROTATION_PITCH_270	Roll: 0, Pitch: 270, Yaw: 0
+        26	MAV_SENSOR_ROTATION_PITCH_180_YAW_90	Roll: 0, Pitch: 180, Yaw: 90
+        27	MAV_SENSOR_ROTATION_PITCH_180_YAW_270	Roll: 0, Pitch: 180, Yaw: 270
+        28	MAV_SENSOR_ROTATION_ROLL_90_PITCH_90	Roll: 90, Pitch: 90, Yaw: 0
+        29	MAV_SENSOR_ROTATION_ROLL_180_PITCH_90	Roll: 180, Pitch: 90, Yaw: 0
+        30	MAV_SENSOR_ROTATION_ROLL_270_PITCH_90	Roll: 270, Pitch: 90, Yaw: 0
+        31	MAV_SENSOR_ROTATION_ROLL_90_PITCH_180	Roll: 90, Pitch: 180, Yaw: 0
+        32	MAV_SENSOR_ROTATION_ROLL_270_PITCH_180	Roll: 270, Pitch: 180, Yaw: 0
+        33	MAV_SENSOR_ROTATION_ROLL_90_PITCH_270	Roll: 90, Pitch: 270, Yaw: 0
+        34	MAV_SENSOR_ROTATION_ROLL_180_PITCH_270	Roll: 180, Pitch: 270, Yaw: 0
+        35	MAV_SENSOR_ROTATION_ROLL_270_PITCH_270	Roll: 270, Pitch: 270, Yaw: 0
+        36	MAV_SENSOR_ROTATION_ROLL_90_PITCH_180_YAW_90	Roll: 90, Pitch: 180, Yaw: 90
+        37	MAV_SENSOR_ROTATION_ROLL_90_YAW_270	Roll: 90, Pitch: 0, Yaw: 270
+        38	MAV_SENSOR_ROTATION_ROLL_90_PITCH_68_YAW_293	Roll: 90, Pitch: 68, Yaw: 293
+        39	MAV_SENSOR_ROTATION_PITCH_315	Pitch: 315
+        40	MAV_SENSOR_ROTATION_ROLL_90_PITCH_315	Roll: 90, Pitch: 315
+        100	MAV_SENSOR_ROTATION_CUSTOM	Custom orientation
+      */
+    function getPrxOrientation(proximity) {
+        if(activeVehicle.objectApmAvoidance.size === proximity  && checkProximityParameter()) {
+            if (activeVehicle.objectApmAvoidance.orientation(proximity)===0 ){
+                switch (activeVehicle.objectApmAvoidance.orientation(proximity)){
+                case 0:
+                    lastOrient="Distance Forward"
+                    break;
+                case 4:
+                    lastOrient="Disstance Backward"
+                    break;
+                case 25:
+                    lastOrient="Ground sonar"
+                    break;
+
+                }
+            }
+        }
+        return lastOrient
+    }
+
 
 
     Rectangle{
@@ -49,58 +198,69 @@ Item {
         width:                  avoidGrid.width *2
         height:                 avoidGrid.height
         x:                      Math.round((mainWindow.width  - width)  * 0.5)//0.5
-        y:                      Math.round((mainWindow.height - height) * 0.5)//0.5
+        y:                      Math.round((mainWindow.height - height) * 0.8)//0.5
         radius:                 2
+        visible: getDistance(1)>=650 ? false:true
+
 
 
         Grid {
             id:                    avoidGrid
             columnSpacing:         1
             rowSpacing:            1
-            columns:               1
+            columns:               4
             anchors.centerIn:      parent
-            Layout.fillWidth:     true
+            visible:  !mainIsMap
 
-
-
-            Image {
-                id:im1
-                width:  ScreenTools.defaultFontPixelWidth *50
-                height: ScreenTools.defaultFontPixelHeight
-                source:     "/custom/img/LevelGreen.svg"
-                cache:      false
-                Layout.alignment: Qt.AlignHCenter
-                fillMode: Image.PreserveAspectFit
+            QGCLabel {
+                height:                 _indicatorsHeight
+                width:                  height
+                Layout.alignment:       Qt.AlignVCenter | Qt.AlignHCenter
+                font.pointSize:         ScreenTools.mediumFontPointSize
+                color:                  qgcPal.text
+                text:                   getPrxOrientation(1)
 
             }
-            Image {
-                id:im2
-                width: ScreenTools.defaultFontPixelWidth *10
-                height: ScreenTools.defaultFontPixelHeight
-                source:     "/custom/img/LevelOrange.svg"
-                cache:      false
-                Layout.alignment: Qt.AlignHCenter
-                fillMode: Image.PreserveAspectFit
 
+            QGCLabel {
+                height:                 _indicatorsHeight
+                width:                  height
+                Layout.alignment:       Qt.AlignVCenter | Qt.AlignHCenter
+                font.pointSize:         ScreenTools.mediumFontPointSize
+                color:                  qgcPal.text
+                text:                   ""
+              }
+
+            QGCLabel {
+                height:                 _indicatorsHeight
+                width:                  height
+                Layout.alignment:       Qt.AlignVCenter | Qt.AlignHCenter
+                font.pointSize:         ScreenTools.mediumFontPointSize
+                color:                  qgcPal.text
+                text:                   ""
+               }
+
+            QGCLabel {
+                height:                 _indicatorsHeight
+                width:                  height
+                Layout.alignment:       Qt.AlignVCenter | Qt.AlignHCenter
+                font.pointSize:         ScreenTools.mediumFontPointSize
+                color:                  qgcPal.text
+                text:                    activeVehicle.objectApmAvoidance.size >0 ? getDistance(1)+" (cm) "
             }
-            Image {
-                id:im3
-                width: ScreenTools.defaultFontPixelWidth *10
-                height: ScreenTools.defaultFontPixelHeight
-                source:     "/custom/img/LevelRed.svg"
-                cache:      false
-                Layout.alignment: Qt.AlignHCenter
-                fillMode: Image.PreserveAspectFit
 
+            Repeater {
+                model:getAvoidLevel(1) * avoidGrid.columns
+                Rectangle {
+                    width: 100; height: 40
+                    border.width: 1
+                    color:getAvoidColor(1)
+                }
             }
 
         }
 
-
-
     }
-
-
 
 
 }
