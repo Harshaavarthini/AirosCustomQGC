@@ -97,6 +97,8 @@
 #include "GeoTagController.h"
 #include "LogReplayLink.h"
 #include "VehicleObjectAvoidance.h"
+#include "VehicleObjectApmAvoidance.h"
+
 #include "TrajectoryPoints.h"
 
 #if defined(QGC_ENABLE_PAIRING)
@@ -498,6 +500,9 @@ void QGCApplication::_initCommon()
     qmlRegisterUncreatableType<MissionManager>          (kQGCVehicle,                       1, 0, "MissionManager",             kRefOnly);
     qmlRegisterUncreatableType<ParameterManager>        (kQGCVehicle,                       1, 0, "ParameterManager",           kRefOnly);
     qmlRegisterUncreatableType<VehicleObjectAvoidance>  (kQGCVehicle,                       1, 0, "VehicleObjectAvoidance",     kRefOnly);
+    //new
+    qmlRegisterUncreatableType<VehicleObjectApmAvoidance>  (kQGCVehicle,                    1, 0, "VehicleObjectApmAvoidance",  kRefOnly);
+
     qmlRegisterUncreatableType<QGCCameraManager>        (kQGCVehicle,                       1, 0, "QGCCameraManager",           kRefOnly);
     qmlRegisterUncreatableType<QGCCameraControl>        (kQGCVehicle,                       1, 0, "QGCCameraControl",           kRefOnly);
     qmlRegisterUncreatableType<QGCVideoStreamInfo>      (kQGCVehicle,                       1, 0, "QGCVideoStreamInfo",         kRefOnly);
