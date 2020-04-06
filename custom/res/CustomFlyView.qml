@@ -804,7 +804,7 @@ Item {
     //-- Object Avoidance VideoSurface
      Loader {
         id:                     objectavoidanceVideo
-        visible:                false
+        visible:                true
         source:                 "/custom/CustomAvoidance.qml"
 
     }
