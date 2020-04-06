@@ -72,7 +72,6 @@ static inline uint8_t linear(uint16_t voltage, uint16_t minVoltage, uint16_t max
 static int CellCapacity;
 
 
-
 class CustomBattery:public QObject
 {
     Q_OBJECT
@@ -167,6 +166,11 @@ private:
         C6=6   // 6 cell
     };
 
+
+    double _averageCurrent[20];
+    int _averageInd;
+    double _lastCurrent;
+    double _lastTime;
 
 
 

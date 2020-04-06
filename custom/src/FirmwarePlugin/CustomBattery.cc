@@ -30,6 +30,8 @@ CustomBattery::CustomBattery(QObject* parent)
     _CellNumber = settings.value(kCellNumber, 1).toInt();
     _showFeatures= settings.value(kshowFeatures,0).toBool();
     _features= settings.value(kshowFeatures,0).toBool();
+    _averageInd=0;
+    _lastTime=0;
 
 }
 
@@ -111,6 +113,7 @@ void CustomBattery::setCellCapacity(int set){
         CellCapacity=set;
         emit cellCapacityChanged();
     }
+
 }
 
 
@@ -126,21 +129,40 @@ double CustomBattery::timeEstimate()
         return -1;
     }
     mahConsumed =_batt->mahConsumed()->rawValue().toDouble();
+
     current= _batt->current()->rawValue().toDouble();
+
+
     ibat=(CellCapacity-mahConsumed)*20;
     k=(60/20);
-    if (current>0 && mahConsumed>0){
+
+        if (current>0 && mahConsumed>0){
+            // Average current
+            if (_averageInd>2){
+                _lastCurrent=_lastCurrent/(_averageInd);
+                time=((ibat/(_lastCurrent*1000))*k)*60;
+               // time=((ibat/(current*1000))*k)*60;
+                _lastTime=time;
+                 emit timeEstimateChanged();
+                _averageInd=_lastCurrent=0;
+            }else{
+                _lastCurrent=_lastCurrent+current;
+                _averageInd++;
+            }
+
+            if (_lastTime>0){
+                return _lastTime;
+            }else{
+                return 0;
+            }
+
+        }else
+        {
+            emit timeEstimateChanged();
+            return -1;
+        }
 
 
-        time=((ibat/(current*1000))*k)*60;
-         emit timeEstimateChanged();
-        return time;
-
-    }else
-    {
-        emit timeEstimateChanged();
-        return -1;
-    }
 
 }
 
@@ -182,6 +204,7 @@ double CustomBattery::cellVoltage(){
 int CustomBattery::levelEstimate(){
 
     _CellVoltage=cellVoltage();
+    _estimateLevel=0;
         if (_CellVoltage>0){
 
             _estimateLevel=level(_CellVoltage*1000,3000,4200,&asigmoidal);
