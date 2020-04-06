@@ -561,16 +561,9 @@ VideoReceiver::start()
     bool running    = false;
     bool pipelineUp = false;
 
-    GstElement*     dataSource  = nullptr;
-    GstCaps*        caps        = nullptr;
-    GstElement*     demux       = nullptr;
-    GstElement*     parser      = nullptr;
-    GstElement*     queue       = nullptr;
-    GstElement*     decoder     = nullptr;
-    GstElement*     queue1      = nullptr;
-    //new
-    GstElement*     rtpjitterbuffer      = nullptr;
-
+    GstElement* source  = nullptr;
+    GstElement* queue   = nullptr;
+    GstElement* decoder = nullptr;
 
     do {
         if ((_pipeline = gst_pipeline_new("receiver")) == nullptr) {
@@ -600,51 +593,21 @@ VideoReceiver::start()
             break;
         }
 
-        //new
-        if ((rtpjitterbuffer = gst_element_factory_make("rtpjitterbuffer", nullptr)) == nullptr) {
-            qCritical() << "VideoReceiver::start() failed. Error with gst_element_factory_make('rtpjitterbuffer') [1]";
+        gst_bin_add_many(GST_BIN(_pipeline), source, _tee, queue, decoder, _videoSink, nullptr);
+
+        pipelineUp = true;
+
+        g_signal_connect(source, "pad-added", G_CALLBACK(newPadCB), _tee);
+
+        if(!gst_element_link_many(_tee, queue, decoder, nullptr)) {
+            qCritical() << "Unable to link UDP elements.";
             break;
         }
 
+        g_signal_connect(decoder, "pad-added", G_CALLBACK(newPadCB), _videoSink);
+        g_signal_connect(decoder, "autoplug-query", G_CALLBACK(autoplugQueryCB), _videoSink);
 
-        if(isTaisyncUSB) {
-            gst_bin_add_many(GST_BIN(_pipeline), dataSource, parser, _tee, queue, decoder, queue1, _videoSink, nullptr);
-        } else {
-            gst_bin_add_many(GST_BIN(_pipeline), dataSource,rtpjitterbuffer, demux, parser, _tee, queue, decoder, queue1, _videoSink, nullptr);
-        }
-        pipelineUp = true;
-
-        if(isUdp264 || isUdp265) {
-            // Link the pipeline in front of the tee
-            if(!gst_element_link_many(dataSource,rtpjitterbuffer, demux, parser, _tee, queue, decoder, queue1, _videoSink, nullptr)) {
-                qCritical() << "Unable to link UDP elements.";
-                break;
-            }
-        } else if(isTaisyncUSB) {
-            // Link the pipeline in front of the tee
-            if(!gst_element_link_many(dataSource, parser, _tee, queue, decoder, queue1, _videoSink, nullptr)) {
-                qCritical() << "Unable to link Taisync USB elements.";
-                break;
-            }
-        } else if (isTCP || isMPEGTS) {
-            if(!gst_element_link(dataSource, demux)) {
-                qCritical() << "Unable to link TCP/MPEG-TS dataSource to Demux.";
-                break;
-            }
-            if(!gst_element_link_many(parser, _tee, queue, decoder, queue1, _videoSink, nullptr)) {
-                qCritical() << "Unable to link TCP/MPEG-TS pipline to parser.";
-                break;
-            }
-            g_signal_connect(demux, "pad-added", G_CALLBACK(newPadCB), parser);
-        } else {
-            g_signal_connect(dataSource, "pad-added", G_CALLBACK(newPadCB), demux);
-            if(!gst_element_link_many(demux, parser, _tee, queue, decoder, _videoSink, nullptr)) {
-                qCritical() << "Unable to link RTSP elements.";
-                break;
-            }
-        }
-
-        dataSource = demux = parser = queue = decoder = queue1 =rtpjitterbuffer= nullptr;
+        source = queue = decoder = nullptr;
 
         GstBus* bus = nullptr;
 
@@ -1219,7 +1182,7 @@ VideoReceiver::_updateTimer()
             _stop = false;
         }
     } else {
-		// FIXME: AV: if pipeline is _running but not _streaming for some time then we need to restart
+        // FIXME: AV: if pipeline is _running but not _streaming for some time then we need to restart
         if(!_stop && !_running && !_uri.isEmpty() && _videoSettings->streamEnabled()->rawValue().toBool()) {
             start();
         }
