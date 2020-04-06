@@ -246,7 +246,7 @@ Item {
                 Layout.alignment:       Qt.AlignVCenter | Qt.AlignHCenter
                 font.pointSize:         ScreenTools.mediumFontPointSize
                 color:                  qgcPal.text
-                text:                    activeVehicle.objectApmAvoidance.size >0 ? getDistance(1)+" (cm) "
+                text:                    activeVehicle.objectApmAvoidance.size >0 ? getDistance(1)+" (cm) ":""
             }
 
             Repeater {
