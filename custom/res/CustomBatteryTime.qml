@@ -130,10 +130,12 @@ Item {
     //--------------------------------------------------------
 
     function getTimeEstimate(battery){
+        var time
 
         if (battery.percentRemaining.value >0.1 && CustomBattery.showFeatures ){
-            if (CustomBattery.timeEstimate !== -1){
-                return secondsToHHMMSS(CustomBattery.timeEstimate)
+            time=CustomBattery.timeEstimate
+            if (time!== -1){
+                return secondsToHHMMSS(time)
             }
         }
         if (battery.percentRemaining.value >0.1 && !CustomBattery.showFeatures ){
