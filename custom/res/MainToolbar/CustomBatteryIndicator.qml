@@ -130,7 +130,8 @@ Item {
         var _temp="Na"
          if (battery.voltage.value >=0 ){
              CustomBattery.batt=battery;
-             CustomBattery.cellNumber= activeVehicle.battery ? activeVehicle.battery.cellCount.value : 0
+             // To fix: no cellCount ??
+             // CustomBattery.cellNumber= activeVehicle.battery ? activeVehicle.battery.cellCount.value : 0
              _temp=CustomBattery.levelEstimate + "%"
 
          }
@@ -143,7 +144,8 @@ Item {
          if (battery.voltage.value >=0){
              CustomBattery.batt=battery;
              checkBatteryParameter()
-             CustomBattery.cellNumber= activeVehicle.battery ? activeVehicle.battery.cellCount.value : 0
+             // To fix: no cellCount ??
+             //CustomBattery.cellNumber= activeVehicle.battery ? activeVehicle.battery.cellCount.value : 0
              var _num=Number(CustomBattery.cellVoltage).toFixed(2)
              _temp=_num + battery1.voltage.units
 
