@@ -21,6 +21,7 @@
 #include "UASMessageHandler.h"
 #include "SettingsFact.h"
 #include "QGCMapCircle.h"
+#include "VehicleObjectApmAvoidance.h"
 
 class UAS;
 class UASInterface;
@@ -37,6 +38,7 @@ class SettingsManager;
 class QGCCameraManager;
 class Joystick;
 class VehicleObjectAvoidance;
+class VehicleObjectApmAvoidance;
 class TrajectoryPoints;
 
 #if defined(QGC_AIRMAP_ENABLED)
@@ -651,6 +653,7 @@ public:
 
     Q_PROPERTY(ParameterManager*        parameterManager    READ parameterManager   CONSTANT)
     Q_PROPERTY(VehicleObjectAvoidance*  objectAvoidance     READ objectAvoidance    CONSTANT)
+    Q_PROPERTY(VehicleObjectApmAvoidance*  objectApmAvoidance     READ objectApmAvoidance    CONSTANT)
 
     // FactGroup object model properties
 
@@ -1002,6 +1005,8 @@ public:
     ParameterManager*       parameterManager() { return _parameterManager; }
     ParameterManager*       parameterManager() const { return _parameterManager; }
     VehicleObjectAvoidance* objectAvoidance()  { return _objectAvoidance; }
+    //new
+    VehicleObjectApmAvoidance* objectApmAvoidance()  { return _objectApmAvoidance; }
 
     static const int cMaxRcChannels = 18;
 
@@ -1453,6 +1458,8 @@ private:
 
     ParameterManager*       _parameterManager   = nullptr;
     VehicleObjectAvoidance* _objectAvoidance    = nullptr;
+    //new
+    VehicleObjectApmAvoidance* _objectApmAvoidance = nullptr;
 
 #if defined(QGC_AIRMAP_ENABLED)
     AirspaceVehicleManager* _airspaceVehicleManager;

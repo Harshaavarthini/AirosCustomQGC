@@ -43,6 +43,7 @@
 #include "VideoSettings.h"
 #include "PositionManager.h"
 #include "VehicleObjectAvoidance.h"
+#include "VehicleObjectApmAvoidance.h"
 #include "TrajectoryPoints.h"
 #include "QGCGeo.h"
 
@@ -459,6 +460,8 @@ void Vehicle::_commonInit()
     connect(_parameterManager, &ParameterManager::parametersReadyChanged, this, &Vehicle::_parametersReady);
 
     _objectAvoidance = new VehicleObjectAvoidance(this, this);
+    //new
+    _objectApmAvoidance= new VehicleObjectApmAvoidance(this,this);
 
     // GeoFenceManager needs to access ParameterManager so make sure to create after
     _geoFenceManager = new GeoFenceManager(this);
@@ -1032,6 +1035,8 @@ void Vehicle::_handleDistanceSensor(mavlink_message_t& message)
     mavlink_distance_sensor_t distanceSensor;
 
     mavlink_msg_distance_sensor_decode(&message, &distanceSensor);
+    _objectApmAvoidance->update(&distanceSensor);
+
 
     struct orientation2Fact_s {
         MAV_SENSOR_ORIENTATION  orientation;
@@ -1053,11 +1058,13 @@ void Vehicle::_handleDistanceSensor(mavlink_message_t& message)
     };
 
     for (size_t i=0; i<sizeof(rgOrientation2Fact)/sizeof(rgOrientation2Fact[0]); i++) {
-        const orientation2Fact_s& orientation2Fact = rgOrientation2Fact[i];
+         const orientation2Fact_s& orientation2Fact = rgOrientation2Fact[i];
         if (orientation2Fact.orientation == distanceSensor.orientation) {
             orientation2Fact.fact->setRawValue(distanceSensor.current_distance / 100.0); // cm to meters
+
         }
     }
+
 }
 
 void Vehicle::_handleAttitudeTarget(mavlink_message_t& message)
