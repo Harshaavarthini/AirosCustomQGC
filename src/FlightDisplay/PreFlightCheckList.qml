@@ -30,7 +30,22 @@ Rectangle {
         source: "/checklists/DefaultChecklist.qml"
     }
 
-    property bool _passed:  false
+    property bool allChecksPassed:  false
+    property var _activeVehicle: QGroundControl.multiVehicleManager.activeVehicle
+
+    on_ActiveVehicleChanged: {
+        if (checkListRepeater.model) {
+            checkListRepeater.model.reset()
+        }
+    }
+
+    onAllChecksPassedChanged: {
+        if (allChecksPassed) {
+            _activeVehicle.checkListState = Vehicle.CheckListPassed
+        } else {
+            _activeVehicle.checkListState = Vehicle.CheckListFailed
+        }
+    }
 
     function _handleGroupPassedChanged(index, passed) {
         if (passed) {
@@ -44,28 +59,39 @@ Rectangle {
                 group._checked = true
             }
         }
-        _passed = passed
+
+        // Walk the list and check if any group is failing
+        var allPassed = true
+        for (var i=0; i < checkListRepeater.count; i++) {
+            if (!checkListRepeater.itemAt(i).passed) {
+                allPassed = false
+                break
+            }
+        }
+        allChecksPassed = allPassed;
     }
 
     //-- Pick a checklist model that matches the current airframe type (if any)
     function _updateModel() {
-        if(activeVehicle) {
-            if(activeVehicle.multiRotor) {
-                modelContainer.source = "/checklists/MultiRotorChecklist.qml"
-            } else if(activeVehicle.vtol) {
-                modelContainer.source = "/checklists/VTOLChecklist.qml"
-            } else if(activeVehicle.rover) {
-                modelContainer.source = "/checklists/RoverChecklist.qml"
-            } else if(activeVehicle.sub) {
-                modelContainer.source = "/checklists/SubChecklist.qml"
-            } else if(activeVehicle.fixedWing) {
-                modelContainer.source = "/checklists/FixedWingChecklist.qml"
-            } else {
-                modelContainer.source = "/checklists/DefaultChecklist.qml"
-            }
-            return
+        var vehicle = _activeVehicle
+        if (!vehicle) {
+           vehicle = QGroundControl.multiVehicleManager.offlineEditingVehicle
         }
-        modelContainer.source = "/checklists/DefaultChecklist.qml"
+
+        if(vehicle.multiRotor) {
+            modelContainer.source = "/checklists/MultiRotorChecklist.qml"
+        } else if(vehicle.vtol) {
+            modelContainer.source = "/checklists/VTOLChecklist.qml"
+        } else if(vehicle.rover) {
+            modelContainer.source = "/checklists/RoverChecklist.qml"
+        } else if(vehicle.sub) {
+            modelContainer.source = "/checklists/SubChecklist.qml"
+        } else if(vehicle.fixedWing) {
+            modelContainer.source = "/checklists/FixedWingChecklist.qml"
+        } else {
+            modelContainer.source = "/checklists/DefaultChecklist.qml"
+        }
+        return
     }
 
     Component.onCompleted: {
@@ -73,15 +99,9 @@ Rectangle {
     }
 
     onVisibleChanged: {
-        if(activeVehicle) {
+        if(_activeVehicle) {
             if(visible) {
                 _updateModel()
-            } else {
-                if(modelContainer.item.model.isPassed()) {
-                    activeVehicle.checkListState = Vehicle.CheckListPassed
-                } else {
-                    activeVehicle.checkListState = Vehicle.CheckListFailed
-                }
             }
         }
     }
@@ -130,7 +150,7 @@ Rectangle {
                 height:     1.75 * ScreenTools.defaultFontPixelHeight
 
                 QGCLabel {
-                    text:                   qsTr("Pre-Flight Checklist %1").arg(_passed ? qsTr("(passed)") : "")
+                    text:                   qsTr("Pre-Flight Checklist %1").arg(allChecksPassed ? qsTr("(passed)") : "")
                     anchors.left:           parent.left
                     anchors.verticalCenter: parent.verticalCenter
                     font.pointSize:         ScreenTools.mediumFontPointSize

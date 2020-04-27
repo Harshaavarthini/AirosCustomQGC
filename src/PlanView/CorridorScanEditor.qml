@@ -71,7 +71,7 @@ Rectangle {
             QGCButton {
                 text:               qsTr("Done With Polyline")
                 Layout.fillWidth:   true
-                enabled:            missionItem.corridorPolyline.isValid
+                enabled:            missionItem.corridorPolyline.isValid && !missionItem.corridorPolyline.traceMode
                 onClicked: {
                     missionItem.wizardMode = false
                     editorRoot.selectNextNotReadyItem()
@@ -118,7 +118,7 @@ Rectangle {
                     distanceToSurfaceLabel:         qsTr("Altitude")
                     distanceToSurfaceAltitudeMode:  missionItem.followTerrain ?
                                                         QGroundControl.AltitudeModeAboveTerrain :
-                                                        missionItem.cameraCalc.distanceToSurfaceRelative
+                                                        (missionItem.cameraCalc.distanceToSurfaceRelative ? QGroundControl.AltitudeModeRelative : QGroundControl.AltitudeModeAbsolute)
                     frontalDistanceLabel:           qsTr("Trigger Dist")
                     sideDistanceLabel:              qsTr("Spacing")
                 }

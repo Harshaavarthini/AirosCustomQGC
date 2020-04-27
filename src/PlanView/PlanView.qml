@@ -291,6 +291,17 @@ Item {
         _missionController.insertComplexMissionItem(complexItemName, mapCenter(), nextIndex, true /* makeCurrentItem */)
     }
 
+    function insertTakeItemAfterCurrent() {
+        var nextIndex = _missionController.currentPlanViewVIIndex + 1
+        _missionController.insertTakeoffItem(mapCenter(), nextIndex, true /* makeCurrentItem */)
+    }
+
+    function insertLandItemAfterCurrent() {
+        var nextIndex = _missionController.currentPlanViewVIIndex + 1
+        _missionController.insertLandItem(mapCenter(), nextIndex, true /* makeCurrentItem */)
+    }
+
+
     function selectNextNotReady() {
         var foundCurrent = false
         for (var i=0; i<_missionController.visualItems.count; i++) {
@@ -559,6 +570,7 @@ Item {
             anchors.top:        parent.top
             z:                  QGroundControl.zOrderWidgets
             maxHeight:          parent.height - toolStrip.y
+            title:              qsTr("Plan")
 
             //readonly property int flyButtonIndex:       0
             readonly property int fileButtonIndex:      0
@@ -605,8 +617,8 @@ Item {
                 {
                     name:               _missionController.isROIActive ? qsTr("Cancel ROI") : qsTr("ROI"),
                     iconSource:         "/qmlimages/MapAddMission.svg",
-                    buttonEnabled:      true,
-                    buttonVisible:      _isMissionLayer,
+                    buttonEnabled:      !_missionController.onlyInsertTakeoffValid,
+                    buttonVisible:      _isMissionLayer && _planMasterController.controllerVehicle.roiModeSupported,
                     toggle:             !_missionController.isROIActive
                 },
                 {
@@ -643,7 +655,7 @@ Item {
                     break*/
                 case takeoffButtonIndex:
                     allAddClickBoolsOff()
-                    _missionController.insertTakeoffItem(mapCenter(), _missionController.currentMissionIndex, true /* makeCurrentItem */)
+                    insertTakeItemAfterCurrent()
                     break
                 case waypointButtonIndex:
                     if (_addWaypointOnClick) {
@@ -675,7 +687,7 @@ Item {
                     break
                 case landButtonIndex:
                     allAddClickBoolsOff()
-                    _missionController.insertLandItem(mapCenter(), _missionController.currentMissionIndex, true /* makeCurrentItem */)
+                    insertLandItemAfterCurrent()
                     break
                 }
             }
@@ -835,12 +847,11 @@ Item {
                         readOnly:       false
                         onClicked:      _missionController.setCurrentPlanViewSeqNum(object.sequenceNumber, false)
                         onRemove: {
-                            var removeIndex = index
-                            _missionController.removeMissionItem(removeIndex)
-                            if (removeIndex >= _missionController.visualItems.count) {
-                                removeIndex--
+                            var removeVIIndex = index
+                            _missionController.removeMissionItem(removeVIIndex)
+                            if (removeVIIndex >= _missionController.visualItems.count) {
+                                removeVIIndex--
                             }
-                            _missionController.setCurrentPlanViewSeqNum(removeIndex, true)
                         }
                         onSelectNextNotReadyItem:   selectNextNotReady()
                     }

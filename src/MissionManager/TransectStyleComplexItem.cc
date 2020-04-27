@@ -498,7 +498,19 @@ void TransectStyleComplexItem::_polyPathTerrainData(bool success, const QList<Te
 
 TransectStyleComplexItem::ReadyForSaveState TransectStyleComplexItem::readyForSaveState(void) const
 {
-    bool terrainReady = _followTerrain ? _transectsPathHeightInfo.count() : true;
+    bool terrainReady = false;
+    if (_followTerrain) {
+        if (_loadedMissionItems.count()) {
+            // We have loaded mission items. Everything is ready to go.
+            terrainReady = true;
+        } else {
+            // Survey is currently being designed. We aren't ready if we don't have terrain heights yet.
+            terrainReady = _transectsPathHeightInfo.count();
+        }
+    } else {
+        // Now following terrain so always ready on terrain
+        terrainReady = true;
+    }
     bool polygonNotReady = !_surveyAreaPolygon.isValid();
     return (polygonNotReady || _wizardMode) ?
                 NotReadyForSaveData :
@@ -738,6 +750,9 @@ int TransectStyleComplexItem::lastSequenceNumber(void) const
     if (_loadedMissionItems.count()) {
         // We have stored mission items, just use those
         return _sequenceNumber + _loadedMissionItems.count() - 1;
+    } else if (_transects.count() == 0) {
+        // Polygon has not yet been set so we just return back a one item complex item for now
+        return _sequenceNumber;
     } else {
         // We have to determine from transects
         int itemCount = 0;

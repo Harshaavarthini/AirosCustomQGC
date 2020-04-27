@@ -4,7 +4,46 @@ Note: This file only contains high level features or important fixes.
 
 ## 4.0
 
-### 4.0.0 - Daily Build
+## 4.0.7 - Not yet releases
+
+### 4.0.6 - Stable
+
+* Analyze/Log Download - Fix download on mobile versions of QGC
+* Fly: Fix problems where Continue Mission and Change Altitude were not available after a Mission Pause.
+* PX4 Flow: Fix video display problem
+
+### 4.0.5
+
+* Solo: Fix mission upload failures
+* Plan: Fix crash when using Create Plan - Survey for fixed wing vehicle
+
+### 4.0.4
+
+* Mobile File Save: Fix problem with incorrect file extension being added
+* Radio Setup: Fix problem with Spektrum bind
+* Plan/Fly: Bring back waypoint number display in map items
+
+### 4.0.3
+
+* Plan: Add setting for takeoff item not required
+* Plan: Takeoff item must be added prior to allowing other item types to enable
+* Video: Add low latency mode as optional configuration setting (defaults to false)
+* ArduPilot: Fix generated list of available firmwares
+
+### 4.0.2
+
+* Fix Mavlink V2 protocol negotation based on capability bits
+* Fix waiting for AUTOPILOT_VERSION response to get capability bits
+* ArduPilot: Above two fixes make fence/rally support enabling more reliable
+
+### 4.0.1
+
+* Fix ArduPilot current mission item tracking in Fly view
+* Fix ADSB vehicle display
+* Fix map positioning bug in Plan view
+* Fix Windows 0xcc000007b startup error causes by incorrect VC runtimes being installed.
+
+### 4.0.0
 
 * Added ROI option during manual flight.
 * Windows: Move builds to 64 bit, Qt 5.12.5
@@ -15,9 +54,7 @@ Note: This file only contains high level features or important fixes.
 * Plan View: New create plan UI for initial plan creation
 * New Corridor editing tools ui. Includes ability to trace polyline by clicking.
 * New Polygon editing tools ui. Includes ability to trace polygon by clicking.
-* ArduCopter/Rover: Follow Me setup page
 * More performant flight path display algorithm. Mobile builds no longer show limited path length.
-* ArduCopter/Rover: Add support for Follow Me
 * ArduPilot: Add Motor Test vehicle setup page
 * Compass Instrument: Add indicators for Home, COG and Next Waypoint headings.
 * Log Replay: Support changing speed of playback
@@ -52,9 +89,9 @@ Note: This file only contains high level features or important fixes.
 * ArduPilot: Support configurable mavlink stream rates. Available from Settings/Mavlink page.
 * Major rewrite and bug fix pass through Structure Scan. Previous version had such bad problems that it can no longer be supported. Plans with Structure Scan will need to be recreated. New QGC will not load old Structure Scan plans.
 
-### 3.5.6 - Not yet released
+## 3.5
 
-### 3.5.5 - Stable
+### 3.5.5
 * Fix mavlink message memset which cause wrong commands to be sent on ArduPilot GotoLocation.
 * Disable Pause when fixed wing is on landing approach.
 

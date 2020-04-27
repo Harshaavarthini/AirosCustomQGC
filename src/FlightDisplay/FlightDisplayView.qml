@@ -571,11 +571,7 @@ Item {
                     action:     _guidedController.actionChangeAlt,
                     visible:    _guidedController.showChangeAlt
                 },
-                {
-                    title:      _guidedController.landAbortTitle,
-                    text:       _guidedController.landAbortMessage,
-                    action:     _guidedController.actionLandAbort,
-                    visible:    _guidedController.showLandAbort
+            // master
                 }
             ]
 

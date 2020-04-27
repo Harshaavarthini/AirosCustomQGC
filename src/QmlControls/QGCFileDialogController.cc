@@ -38,13 +38,21 @@ QStringList QGCFileDialogController::getFiles(const QString& directoryPath, cons
     return files;
 }
 
-QString QGCFileDialogController::filenameWithExtension(const QString& filename, const QString& fileExtension)
+QString QGCFileDialogController::filenameWithExtension(const QString& filename, const QStringList& rgFileExtensions)
 {
     QString filenameWithExtension(filename);
 
-    QString correctExtension = QString(".%1").arg(fileExtension);
-    if (!filenameWithExtension.endsWith(correctExtension)) {
-        filenameWithExtension += correctExtension;
+    bool matchFound = false;
+    for (const QString& extension : rgFileExtensions) {
+        QString dotExtension = QStringLiteral(".%1").arg(extension);
+        matchFound = filenameWithExtension.endsWith(dotExtension);
+        if (matchFound) {
+            break;
+        }
+    }
+
+    if (!matchFound) {
+        filenameWithExtension += QStringLiteral(".%1").arg(rgFileExtensions[0]);
     }
 
     return filenameWithExtension;
@@ -55,9 +63,9 @@ bool QGCFileDialogController::fileExists(const QString& filename)
     return QFile(filename).exists();
 }
 
-QString QGCFileDialogController::fullyQualifiedFilename(const QString& directoryPath, const QString& filename, const QString& fileExtension)
+QString QGCFileDialogController::fullyQualifiedFilename(const QString& directoryPath, const QString& filename, const QStringList& rgFileExtensions)
 {
-    return directoryPath + QStringLiteral("/") + filenameWithExtension(filename, fileExtension);
+    return directoryPath + QStringLiteral("/") + filenameWithExtension(filename, rgFileExtensions);
 }
 
 void QGCFileDialogController::deleteFile(const QString& filename)

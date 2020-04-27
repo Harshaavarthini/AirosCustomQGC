@@ -41,7 +41,7 @@ Item {
 
     /// Normalize longitude to range: 0 to 360, W to E
     function normalizeLon(lon) {
-        return lon  + 180.0
+        return lon + 180.0
     }
 
     /// Fits the visible region of the map to inclues all of the specified coordinates. If no coordinates
@@ -62,8 +62,14 @@ Item {
         var east = normalizeLon(coordList[0].longitude)
         var west = east
         for (var i = 1; i < coordList.length; i++) {
-            var lat = normalizeLat(coordList[i].latitude)
-            var lon = normalizeLon(coordList[i].longitude)
+            var lat = coordList[i].latitude
+            var lon = coordList[i].longitude
+            if (isNaN(lat) || lat == 0 || isNaN(lon) || lon == 0) {
+                // Be careful of invalid coords which can happen when items are not yet complete
+                continue
+            }
+            lat = normalizeLat(lat)
+            lon = normalizeLon(lon)
             north = Math.max(north, lat)
             south = Math.min(south, lat)
             east  = Math.max(east,  lon)
@@ -71,8 +77,8 @@ Item {
         }
 
         // Expand the coordinate bounding rect to make room for the tools around the edge of the map
-        var latDegreesPerPixel = (north - south) / mapFitViewport.width
-        var lonDegreesPerPixel = (east  - west)  / mapFitViewport.height
+        var latDegreesPerPixel = (north - south) / mapFitViewport.height
+        var lonDegreesPerPixel = (east  - west)  / mapFitViewport.width
         north = Math.min(north + (mapFitViewport.y * latDegreesPerPixel), 180)
         south = Math.max(south - ((map.height - mapFitViewport.bottom) * latDegreesPerPixel), 0)
         west  = Math.max(west  - (mapFitViewport.x * lonDegreesPerPixel), 0)
@@ -88,7 +94,6 @@ Item {
         var topLeftCoord      = QtPositioning.coordinate(north - 90.0, west - 180.0)
         var bottomRightCoord  = QtPositioning.coordinate(south - 90.0, east - 180.0)
         map.setVisibleRegion(QtPositioning.rectangle(topLeftCoord, bottomRightCoord))
-
     }
 
     function addMissionItemCoordsForFit(coordList) {
@@ -110,19 +115,6 @@ Item {
             // Being called prior to controller.start
             return
         }
-        /*
-        for (var i=1; i<_missionController.visualItems.count; i++) {
-            var missionItem = _missionController.visualItems.get(i)
-            if (missionItem.specifiesCoordinate && !missionItem.isStandaloneCoordinate) {
-                console.log(missionItem.boundingCube.pointNW)
-                console.log(missionItem.boundingCube.pointSE)
-                var loc = QtPositioning.rectangle(missionItem.boundingCube.pointNW, missionItem.boundingCube.pointSE)
-                console.log(loc)
-                map.visibleRegion = loc
-                return
-            }
-        }
-        */
         var coordList = [ ]
         addMissionItemCoordsForFit(coordList)
         fitMapViewportToAllCoordinates(coordList)

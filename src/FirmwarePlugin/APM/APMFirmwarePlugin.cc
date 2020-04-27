@@ -162,10 +162,7 @@ APMFirmwarePlugin::APMFirmwarePlugin(void)
     qmlRegisterType<APMSensorsComponentController>      ("QGroundControl.Controllers", 1, 0, "APMSensorsComponentController");
     qmlRegisterType<APMFollowComponentController>       ("QGroundControl.Controllers", 1, 0, "APMFollowComponentController");
     qmlRegisterType<RadioComponentController>           ("QGroundControl.Controllers", 1, 0, "RadioComponentController");
-
 }
-
-AutoPilotPlugin* APMFirmwarePlugin::autopilotPlugin(Vehicle* vehicle)
 {
     return new APMAutoPilotPlugin(vehicle, vehicle);
 }

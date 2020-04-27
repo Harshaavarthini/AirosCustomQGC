@@ -28,12 +28,12 @@ matrix:
         - name: "Android 32 bit"
           dist: trusty
           language: android
-          env: SPEC=android-clang CONFIG=installer BITNESS=32
+          env: SPEC=android-clang CONFIG=installer BITNESS=32 GSTREAMER_NAME=armv7
           sudo: false
         - name: "Android 64 bit"
           dist: trusty
           language: android
-          env: SPEC=android-clang CONFIG=installer BITNESS=64
+          env: SPEC=android-clang CONFIG=installer BITNESS=64 GSTREAMER_NAME=arm64
           sudo: false
         - name: "OSX Installer"
           os: osx
@@ -96,8 +96,8 @@ install:
 
   # android dependencies: qt, gstreamer, android-ndk
   - if [ "${SPEC}" = "android-clang" ]; then
-        wget --quiet https://s3-us-west-2.amazonaws.com/qgroundcontrol/dependencies/gstreamer-1.0-android-universal-1.14.4.tar.bz2 &&
-        tar jxf gstreamer-1.0-android-universal-1.14.4.tar.bz2 -C ${TRAVIS_BUILD_DIR} &&
+        wget --quiet https://s3-us-west-2.amazonaws.com/qgroundcontrol/dependencies/gstreamer-1.0-android-${GSTREAMER_NAME}-1.14.4.tar.bz2 &&
+        tar jxf gstreamer-1.0-android-${GSTREAMER_NAME}-1.14.4.tar.bz2 -C ${TRAVIS_BUILD_DIR} &&
         wget --quiet https://dl.google.com/android/repository/android-ndk-r20-linux-x86_64.zip &&
         unzip android-ndk-r20-linux-x86_64.zip > /dev/null &&
         export ANDROID_NDK_ROOT=`pwd`/android-ndk-r20 &&
@@ -225,6 +225,7 @@ before_deploy:
 deploy:
   # deploy installers to s3 builds/ if on a branch
   - provider: s3
+    edge: true # Use V2 provider to work around V1 bug
     access_key_id: AKIAIVORNALE7NHD3T6Q
     secret_access_key:
       secure: BsLXeXUPsCJdX4tawrDnO8OFK5Hk4kzlDTiyH93En6TbjUargVAWDMcHVj7TUhr7+3Tao1W1zb0G4SJe9kHv+jrky0yE72KvoG3YAON0VXWKizxBAKkgHE2RxSTNAwDeKbi2G6YJfNDescBBfX7zEohShdXglQu7CGaUQKRaiI4=
@@ -240,6 +241,7 @@ deploy:
 
   # deploy tagged installers to s3 latest/
   - provider: s3
+    edge: true # Use V2 provider to work around V1 bug
     access_key_id: AKIAIVORNALE7NHD3T6Q
     secret_access_key:
       secure: BsLXeXUPsCJdX4tawrDnO8OFK5Hk4kzlDTiyH93En6TbjUargVAWDMcHVj7TUhr7+3Tao1W1zb0G4SJe9kHv+jrky0yE72KvoG3YAON0VXWKizxBAKkgHE2RxSTNAwDeKbi2G6YJfNDescBBfX7zEohShdXglQu7CGaUQKRaiI4=
@@ -255,6 +257,7 @@ deploy:
 
   # deploy tagged installers to s3 version folder
   - provider: s3
+    edge: true # Use V2 provider to work around V1 bug
     access_key_id: AKIAIVORNALE7NHD3T6Q
     secret_access_key:
       secure: BsLXeXUPsCJdX4tawrDnO8OFK5Hk4kzlDTiyH93En6TbjUargVAWDMcHVj7TUhr7+3Tao1W1zb0G4SJe9kHv+jrky0yE72KvoG3YAON0VXWKizxBAKkgHE2RxSTNAwDeKbi2G6YJfNDescBBfX7zEohShdXglQu7CGaUQKRaiI4=
@@ -270,6 +273,7 @@ deploy:
 
   # deploy installers to Github releases if on a tag
   - provider: releases
+    edge: true # Use V2 provider to work around V1 bug
     api-key:
       secure: K/Zqr/FCC7QvzFxYvBtCinPkacQq2ubJ2qm982+38Zf/KjibVOF1dEbVdrGZmII6Tg5DaQzNXGYkg5PvYmJgT9xRsqeQjeYIUYqYZpAt+HYWA38AVfMU8jip/1P1wmwqD469nzJOBBa8yfsMs6Ca7tBaNl/zTxCRGnAgEzqtkdQ=
     file_glob: true
@@ -280,6 +284,7 @@ deploy:
     on:
       tags: true
       condition: $CONFIG = installer
+      condition: $SPEC != macx-clang # GitHub OSX deploy broken due to travis problem
 
 notifications:
   webhooks:

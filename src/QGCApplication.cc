@@ -27,6 +27,7 @@
 #include <QRegularExpression>
 #include <QFontDatabase>
 #include <QQuickWindow>
+#include <QQuickImageProvider>
 
 #ifdef QGC_ENABLE_BLUETOOTH
 #include <QBluetoothLocalDevice>
@@ -100,6 +101,7 @@
 #include "VehicleObjectApmAvoidance.h"
 
 #include "TrajectoryPoints.h"
+#include "QGCImageProvider.h"
 
 #if defined(QGC_ENABLE_PAIRING)
 #include "PairingManager.h"
@@ -321,27 +323,12 @@ QGCApplication::QGCApplication(int &argc, char* argv[], bool unitTesting)
 #endif
 
     // Gstreamer debug settings
-#if defined(__ios__) || defined(__android__)
-    // Initialize Video Streaming
-    initializeVideoStreaming(argc, argv, nullptr, nullptr);
-#else
-    QString savePath, gstDebugLevel;
-    if (settings.contains(AppSettings::savePathName)) {
-        savePath = settings.value(AppSettings::savePathName).toString();
-    }
-    if(savePath.isEmpty()) {
-        savePath = "/tmp";
-    }
-    savePath = savePath + "/Logs/gst";
-    if (!QDir(savePath).exists()) {
-        QDir().mkpath(savePath);
-    }
+    int gstDebugLevel = 0;
     if (settings.contains(AppSettings::gstDebugLevelName)) {
-        gstDebugLevel = "*:" + settings.value(AppSettings::gstDebugLevelName).toString();
+        gstDebugLevel = settings.value(AppSettings::gstDebugLevelName).toInt();
     }
     // Initialize Video Streaming
-    initializeVideoStreaming(argc, argv, savePath.toUtf8().data(), gstDebugLevel.toUtf8().data());
-#endif
+    initializeVideoStreaming(argc, argv, gstDebugLevel);
 
     _toolbox = new QGCToolbox(this);
     _toolbox->setChildToolboxes();
@@ -580,6 +567,10 @@ bool QGCApplication::_initForNormalAppBoot()
     QSettings settings;
 
     _qmlAppEngine = toolbox()->corePlugin()->createRootWindow(this);
+
+    // Image provider for PX4 Flow
+    QQuickImageProvider* pImgProvider = dynamic_cast<QQuickImageProvider*>(qgcApp()->toolbox()->imageProvider());
+    _qmlAppEngine->addImageProvider(QStringLiteral("QGCImages"), pImgProvider);
 
     QQuickWindow* rootWindow = (QQuickWindow*)qgcApp()->mainRootWindow();
 

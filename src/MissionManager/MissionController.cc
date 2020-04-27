@@ -31,6 +31,7 @@
 #include "KML.h"
 #include "QGCCorePlugin.h"
 #include "TakeoffMissionItem.h"
+#include "PlanViewSettings.h"
 
 #define UPDATE_TIMEOUT 5000 ///< How often we check for bounding box changes
 
@@ -59,6 +60,7 @@ const QString MissionController::patternCorridorScanName    (QT_TRANSLATE_NOOP("
 
 MissionController::MissionController(PlanMasterController* masterController, QObject *parent)
     : PlanElementController     (masterController, parent)
+    , _planViewSettings         (qgcApp()->toolbox()->settingsManager()->planViewSettings())
     , _missionManager           (_managerVehicle->missionManager())
     , _missionItemCount         (0)
     , _visualItems              (nullptr)
@@ -77,6 +79,8 @@ MissionController::MissionController(PlanMasterController* masterController, QOb
     managerVehicleChanged(_managerVehicle);
     _updateTimer.setSingleShot(true);
     connect(&_updateTimer, &QTimer::timeout, this, &MissionController::_updateTimeout);
+
+    connect(_planViewSettings->takeoffItemNotRequired(), &Fact::rawValueChanged, this, &MissionController::_takeoffItemNotRequiredChanged);
 }
 
 MissionController::~MissionController()
@@ -178,7 +182,7 @@ void MissionController::_newMissionItemsAvailableFromVehicle(bool removeAllReque
         MissionSettingsItem* settingsItem = _addMissionSettings(newControllerMissionItems);
 
         int i=0;
-        if (_controllerVehicle->firmwarePlugin()->sendHomePositionToVehicle() && newMissionItems.count() != 0 && !_flyView) {
+        if (_controllerVehicle->firmwarePlugin()->sendHomePositionToVehicle() && newMissionItems.count() != 0) {
             // First item is fake home position
             MissionItem* fakeHomeItem = newMissionItems[0];
             if (fakeHomeItem->coordinate().latitude() != 0 || fakeHomeItem->coordinate().longitude() != 0) {
@@ -355,7 +359,7 @@ int MissionController::_nextSequenceNumber(void)
 VisualMissionItem* MissionController::_insertSimpleMissionItemWorker(QGeoCoordinate coordinate, MAV_CMD command, int visualItemIndex, bool makeCurrentItem)
 {
     int sequenceNumber = _nextSequenceNumber();
-    SimpleMissionItem * newItem = new SimpleMissionItem(_controllerVehicle, _flyView, this);
+    SimpleMissionItem * newItem = new SimpleMissionItem(_controllerVehicle, _flyView, false /* forLoad */, this);
     newItem->setSequenceNumber(sequenceNumber);
     newItem->setCoordinate(coordinate);
     newItem->setCommand(command);
@@ -598,6 +602,16 @@ void MissionController::removeMissionItem(int viIndex)
     }
 
     _recalcAll();
+
+    // Adjust current item
+    int newVIIndex;
+    if (viIndex >= _visualItems->count()) {
+        newVIIndex = _visualItems->count() - 1;
+    } else {
+        newVIIndex = viIndex;
+    }
+    setCurrentPlanViewSeqNum(_visualItems->value<VisualMissionItem*>(newVIIndex)->sequenceNumber(), true);
+
     setDirty(true);
 }
 
@@ -659,7 +673,7 @@ bool MissionController::_loadJsonMissionFileV1(const QJsonObject& json, QmlObjec
 
     MissionSettingsItem* settingsItem = _addMissionSettings(visualItems);
     if (json.contains(_jsonPlannedHomePositionKey)) {
-        SimpleMissionItem* item = new SimpleMissionItem(_controllerVehicle, _flyView, visualItems);
+        SimpleMissionItem* item = new SimpleMissionItem(_controllerVehicle, _flyView, true /* forLoad */, visualItems);
         if (item->load(json[_jsonPlannedHomePositionKey].toObject(), 0, errorString)) {
             settingsItem->setInitialHomePositionFromUser(item->coordinate());
             item->deleteLater();
@@ -695,11 +709,11 @@ bool MissionController::_loadJsonMissionFileV1(const QJsonObject& json, QmlObjec
             }
 
             const QJsonObject itemObject = itemValue.toObject();
-            SimpleMissionItem* item = new SimpleMissionItem(_controllerVehicle, _flyView, visualItems);
+            SimpleMissionItem* item = new SimpleMissionItem(_controllerVehicle, _flyView, true /* forLoad */, visualItems);
             if (item->load(itemObject, itemObject["id"].toInt(), errorString)) {
                 if (TakeoffMissionItem::isTakeoffCommand(item->mavCommand())) {
                     // This needs to be a TakeoffMissionItem
-                    TakeoffMissionItem* takeoffItem = new TakeoffMissionItem(_controllerVehicle, _flyView, settingsItem, visualItems);
+                    TakeoffMissionItem* takeoffItem = new TakeoffMissionItem(_controllerVehicle, _flyView, settingsItem, true /* forLoad */, visualItems);
                     takeoffItem->load(itemObject, itemObject["id"].toInt(), errorString);
                     item->deleteLater();
                     item = takeoffItem;
@@ -783,11 +797,11 @@ bool MissionController::_loadJsonMissionFileV2(const QJsonObject& json, QmlObjec
         QString itemType = itemObject[VisualMissionItem::jsonTypeKey].toString();
 
         if (itemType == VisualMissionItem::jsonTypeSimpleItemValue) {
-            SimpleMissionItem* simpleItem = new SimpleMissionItem(_controllerVehicle, _flyView, visualItems);
+            SimpleMissionItem* simpleItem = new SimpleMissionItem(_controllerVehicle, _flyView, true /* forLoad */, visualItems);
             if (simpleItem->load(itemObject, nextSequenceNumber, errorString)) {
                 if (TakeoffMissionItem::isTakeoffCommand(static_cast<MAV_CMD>(simpleItem->command()))) {
                     // This needs to be a TakeoffMissionItem
-                    TakeoffMissionItem* takeoffItem = new TakeoffMissionItem(_controllerVehicle, _flyView, settingsItem, this);
+                    TakeoffMissionItem* takeoffItem = new TakeoffMissionItem(_controllerVehicle, _flyView, settingsItem, true /* forLoad */, this);
                     takeoffItem->load(itemObject, nextSequenceNumber, errorString);
                     simpleItem->deleteLater();
                     simpleItem = takeoffItem;
@@ -927,14 +941,14 @@ bool MissionController::_loadTextMissionFile(QTextStream& stream, QmlObjectListM
         MissionSettingsItem* settingsItem = _addMissionSettings(visualItems);
 
         while (!stream.atEnd()) {
-            SimpleMissionItem* item = new SimpleMissionItem(_controllerVehicle, _flyView, visualItems);
+            SimpleMissionItem* item = new SimpleMissionItem(_controllerVehicle, _flyView, true /* forLoad */, visualItems);
             if (item->load(stream)) {
                 if (firstItem && plannedHomePositionInFile) {
                     settingsItem->setInitialHomePositionFromUser(item->coordinate());
                 } else {
                     if (TakeoffMissionItem::isTakeoffCommand(static_cast<MAV_CMD>(item->command()))) {
                         // This needs to be a TakeoffMissionItem
-                        TakeoffMissionItem* takeoffItem = new TakeoffMissionItem(_controllerVehicle, _flyView, settingsItem, visualItems);
+                        TakeoffMissionItem* takeoffItem = new TakeoffMissionItem(_controllerVehicle, _flyView, settingsItem, true /* forLoad */, visualItems);
                         takeoffItem->load(stream);
                         item->deleteLater();
                         item = takeoffItem;
@@ -1218,8 +1232,7 @@ void MissionController::_recalcWaypointLines(void)
     bool                foundRTL =                      false;
     bool                homePositionValid =             _settingsItem->coordinate().isValid();
     bool                roiActive =                     false;
-    bool                setupIncompleteItem =           false;
-    VisualMissionItem*  startVIForIncompleteItem =      nullptr;
+    bool                previousItemIsIncomplete =      false;
 
     qCDebug(MissionControllerLog) << "_recalcWaypointLines homePositionValid" << homePositionValid;
 
@@ -1227,6 +1240,10 @@ void MissionController::_recalcWaypointLines(void)
 
     _linesTable.clear();
     _waypointPath.clear();
+
+    // Note: Although visual support _incompleteComplexItemLines is still in the codebase. The support for populating the list is not.
+    // This is due to the initial implementation being buggy and incomplete with respect to correctly generating the line set.
+    // So for now we leave the code for displaying them in, but none are ever added until we have time to implement the correct support.
 
     _waypointLines.beginReset();
     _directionArrows.beginReset();
@@ -1282,32 +1299,31 @@ void MissionController::_recalcWaypointLines(void)
 
         if (visualItem->specifiesCoordinate() && !visualItem->isStandaloneCoordinate()) {
             // Incomplete items are complex items which are waiting for the user to complete setup before there visuals can become valid.
-            // For example a Survey which has no polygon set for it yet. For these cases we draw incomplete segment lines so that there
-            // isn't a hole in the flight path lines.
+            // They may not yet have valid entry/exit coordinates associated with them while in the incomplete state.
+            // For examples a Survey item which has no polygon set yet.
             if (complexItem && complexItem->isIncomplete()) {
-                setupIncompleteItem = true;
+                // We don't link lines from a valid item to an incomplete item
+                previousItemIsIncomplete = true;
+            } else if (previousItemIsIncomplete) {
+                // We also don't link lines from an incomplete item to a valid item.
+                previousItemIsIncomplete = false;
+                firstCoordinateNotFound = false;
+                lastCoordinateItemBeforeRTL = visualItem;
             } else {
-                if (setupIncompleteItem) {
-                    VisualItemPair viPair(startVIForIncompleteItem, visualItem);
-                    CoordinateVector* coordVector = _createCoordinateVectorWorker(viPair);
-
-                    _incompleteComplexItemLines.append(coordVector);
-                    startVIForIncompleteItem = nullptr;
-                    setupIncompleteItem = false;
-                } else {
-                    startVIForIncompleteItem = visualItem;
-                }
-
                 if (lastCoordinateItemBeforeRTL != _settingsItem || (homePositionValid && linkStartToHome)) {
-                    // Direction arrows are added to the first segment and every 5 segments in the middle.
                     bool addDirectionArrow = false;
-                    if (firstCoordinateNotFound || !lastCoordinateItemBeforeRTL->isSimpleItem() || !visualItem->isSimpleItem()) {
-                        addDirectionArrow = true;
-                    } else if (segmentCount > 5) {
-                        segmentCount = 0;
-                        addDirectionArrow = true;
+                    if (i != 1) {
+                        // Direction arrows are added to the second segment and every 5 segments thereafter.
+                        // The reason for start with second segment is to prevent an arrow being added in between the home position
+                        // and a takeoff item which may be right over each other. In that case the arrow points in a random direction.
+                        if (firstCoordinateNotFound || !lastCoordinateItemBeforeRTL->isSimpleItem() || !visualItem->isSimpleItem()) {
+                            addDirectionArrow = true;
+                        } else if (segmentCount > 5) {
+                            segmentCount = 0;
+                            addDirectionArrow = true;
+                        }
+                        segmentCount++;
                     }
-                    segmentCount++;
 
                     lastSegmentVisualItemPair =  VisualItemPair(lastCoordinateItemBeforeRTL, visualItem);
                     if (!_flyView || addDirectionArrow) {
@@ -2278,14 +2294,16 @@ bool MissionController::_isROICancelItem(SimpleMissionItem* simpleItem)
 void MissionController::setCurrentPlanViewSeqNum(int sequenceNumber, bool force)
 {
     if (_visualItems && (force || sequenceNumber != _currentPlanViewSeqNum)) {
-        bool    foundLand =         false;
-        int     takeoffIndex =      -1;
-        int     landIndex =         -1;
+        bool    foundLand =             false;
+        int     takeoffSeqNum =         -1;
+        int     landSeqNum =            -1;
+        int     lastFlyThroughSeqNum =  -1;
 
         _splitSegment =                 nullptr;
         _currentPlanViewItem  =         nullptr;
         _currentPlanViewSeqNum =        -1;
         _currentPlanViewVIIndex =       -1;
+        _onlyInsertTakeoffValid =       !_planViewSettings->takeoffItemNotRequired()->rawValue().toBool() && _visualItems->count() == 1; // First item must be takeoff
         _isInsertTakeoffValid =         true;
         _isInsertLandValid =            true;
         _isROIActive =                  false;
@@ -2294,10 +2312,11 @@ void MissionController::setCurrentPlanViewSeqNum(int sequenceNumber, bool force)
         _previousCoordinate =           QGeoCoordinate();
 
         for (int viIndex=0; viIndex<_visualItems->count(); viIndex++) {
-            VisualMissionItem* pVI =        qobject_cast<VisualMissionItem*>(_visualItems->get(viIndex));
-            SimpleMissionItem* simpleItem = qobject_cast<SimpleMissionItem*>(pVI);
+            VisualMissionItem*  pVI =        qobject_cast<VisualMissionItem*>(_visualItems->get(viIndex));
+            SimpleMissionItem*  simpleItem = qobject_cast<SimpleMissionItem*>(pVI);
+            int                 currentSeqNumber = pVI->sequenceNumber();
 
-            if (sequenceNumber != 0 && pVI->sequenceNumber() <= sequenceNumber) {
+            if (sequenceNumber != 0 && currentSeqNumber <= sequenceNumber) {
                 if (pVI->specifiesCoordinate() && !pVI->isStandaloneCoordinate()) {
                     // Coordinate based flight commands prior to where the takeoff would be inserted
                     _isInsertTakeoffValid = false;
@@ -2305,7 +2324,7 @@ void MissionController::setCurrentPlanViewSeqNum(int sequenceNumber, bool force)
             }
 
             if (qobject_cast<TakeoffMissionItem*>(pVI)) {
-                takeoffIndex = viIndex;
+                takeoffSeqNum = currentSeqNumber;
                 _isInsertTakeoffValid = false;
             }
 
@@ -2317,7 +2336,7 @@ void MissionController::setCurrentPlanViewSeqNum(int sequenceNumber, bool force)
                     case MAV_CMD_DO_LAND_START:
                     case MAV_CMD_NAV_RETURN_TO_LAUNCH:
                         foundLand = true;
-                        landIndex = viIndex;
+                        landSeqNum = currentSeqNumber;
                         break;
                     default:
                         break;
@@ -2326,19 +2345,19 @@ void MissionController::setCurrentPlanViewSeqNum(int sequenceNumber, bool force)
                     FixedWingLandingComplexItem* fwLanding = qobject_cast<FixedWingLandingComplexItem*>(pVI);
                     if (fwLanding) {
                         foundLand = true;
-                        landIndex = viIndex;
+                        landSeqNum = currentSeqNumber;
                     }
                 }
             }
 
             if (simpleItem) {
                 // Remember previous coordinate
-                if (pVI->sequenceNumber() < sequenceNumber && simpleItem->specifiesCoordinate() && !simpleItem->isStandaloneCoordinate()) {
+                if (currentSeqNumber < sequenceNumber && simpleItem->specifiesCoordinate() && !simpleItem->isStandaloneCoordinate()) {
                     _previousCoordinate = simpleItem->coordinate();
                 }
 
                 // ROI state handling
-                if (pVI->sequenceNumber() <= sequenceNumber) {
+                if (currentSeqNumber <= sequenceNumber) {
                     if (_isROIActive) {
                         if (_isROICancelItem(simpleItem)) {
                             _isROIActive = false;
@@ -2349,12 +2368,17 @@ void MissionController::setCurrentPlanViewSeqNum(int sequenceNumber, bool force)
                         }
                     }
                 }
-                if (pVI->sequenceNumber() == sequenceNumber && _isROIBeginItem(simpleItem)) {
+                if (currentSeqNumber == sequenceNumber && _isROIBeginItem(simpleItem)) {
                     _isROIBeginCurrentItem = true;
+                }
+
+                if (simpleItem->specifiesCoordinate() && !simpleItem->isStandaloneCoordinate()) {
+                    lastFlyThroughSeqNum = currentSeqNumber;
                 }
             }
 
-            if (pVI->sequenceNumber() == sequenceNumber) {
+
+            if (currentSeqNumber == sequenceNumber) {
                 pVI->setIsCurrentItem(true);
                 pVI->setHasCurrentChildItem(false);
 
@@ -2383,9 +2407,9 @@ void MissionController::setCurrentPlanViewSeqNum(int sequenceNumber, bool force)
             }
         }
 
-        if (takeoffIndex != -1) {
+        if (takeoffSeqNum != -1) {
             // Takeoff item was found which means mission starts from ground
-            if (sequenceNumber < takeoffIndex) {
+            if (sequenceNumber < takeoffSeqNum) {
                 // Land is only valid after the takeoff item.
                 _isInsertLandValid = false;
                 // Fly through commands are not allowed prior to the takeoff command
@@ -2393,19 +2417,31 @@ void MissionController::setCurrentPlanViewSeqNum(int sequenceNumber, bool force)
             }
         }
 
+        if (lastFlyThroughSeqNum != -1) {
+            // Land item must be after any fly through coordinates
+            if (sequenceNumber < lastFlyThroughSeqNum) {
+                _isInsertLandValid = false;
+            }
+        }
+
         if (foundLand) {
             // Can't have more than one land sequence
             _isInsertLandValid = false;
-            if (sequenceNumber >= landIndex) {
+            if (sequenceNumber >= landSeqNum) {
                 // Can't have fly through commands after a land item
                 _flyThroughCommandsAllowed = false;
             }
         }
 
+        // These are not valid when only takeoff is allowed
+        _isInsertLandValid =            _isInsertLandValid && !_onlyInsertTakeoffValid;
+        _flyThroughCommandsAllowed =    _flyThroughCommandsAllowed && !_onlyInsertTakeoffValid;
+
         emit currentPlanViewSeqNumChanged();
         emit currentPlanViewVIIndexChanged();
         emit currentPlanViewItemChanged();
         emit splitSegmentChanged();
+        emit onlyInsertTakeoffValidChanged();
         emit isInsertTakeoffValidChanged();
         emit isInsertLandValidChanged();
         emit isROIActiveChanged();
@@ -2502,4 +2538,10 @@ void MissionController::_complexBoundingBoxChanged()
 bool MissionController::isEmpty(void) const
 {
     return _visualItems->count() <= 1;
+}
+
+void MissionController::_takeoffItemNotRequiredChanged(void)
+{
+    // Force a recalc of allowed bits
+    setCurrentPlanViewSeqNum(_currentPlanViewSeqNum, true /* force */);
 }
