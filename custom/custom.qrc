@@ -14,6 +14,7 @@
         <file alias="PreFlightCheckList.qml">res/PreFlightCheckList.qml</file>
         <file alias="CustomBatteryTime.qml">res/CustomBatteryTime.qml</file>
         <file alias="CustomAvoidance.qml">res/CustomAvoidance.qml</file>
+        <file>res/Images/sonar.svg</file>
     </qresource>
     <qresource prefix="/custom/img">
         <file alias="altitude.svg">res/Images/altitude.svg</file>
@@ -47,6 +48,7 @@
         <file alias="LevelGreen.svg">res/Images/LevelGreen.svg</file>
         <file alias="LevelOrange.svg">res/Images/LevelOrange.svg</file>
         <file alias="LevelRed.svg">res/Images/LevelRed.svg</file>
+        <file alias="sonar.svg">res/Images/sonar.svg</file>
     </qresource>
     <qresource prefix="/Custom/Widgets">
         <file alias="Custom/Widgets/CustomArtificialHorizon.qml">res/Custom/Widgets/CustomArtificialHorizon.qml</file>

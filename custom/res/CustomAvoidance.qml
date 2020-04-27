@@ -35,8 +35,12 @@ Item {
     property int lastLevel
     property int lastDistance
     property string lastOrient
+    property int maxdistance
 
     property color lastColor:qgcPal.colorGrey
+
+    property var listTextProx: ['N/A']
+    property var listDistProx: ['N/A']
 
 
     Connections {
@@ -58,19 +62,9 @@ Item {
 
     //---------------------------------------------------------------------
 
-    function checkProximityParameter(){
-        /*prxParamsAvailable= controller.parameterExists(-1, "RNGFND1_ORIENT")
-            if (prxParamsAvailable){
-                proximitySettings=controller.getParameterFact(-1, "RNGFND1_ORIENT", true )
-            }
-            if(proximitySettings && proximitySettings.value>0) {
-                return true
-
-            }else{
-                return true
-            }*/
-
+    function checkProximityParameter(proximity){
         if (activeVehicle.objectApmAvoidance.size >0 ){
+            maxdistance=activeVehicle.objectApmAvoidance.maxdistance(proximity)
             return true
         }else{
             return false
@@ -82,7 +76,7 @@ Item {
     //-----------------------------------------------------------------------
     function getAvoidColor(proximity) {
 
-        if(activeVehicle.objectApmAvoidance.size === proximity && checkProximityParameter()  && activeVehicle.objectApmAvoidance.orientation(proximity)===0  ) {
+        if(activeVehicle.objectApmAvoidance.size === proximity && checkProximityParameter(proximity)  && activeVehicle.objectApmAvoidance.orientation(proximity)===0  ) {
             if(activeVehicle.objectApmAvoidance.level(proximity)===3) {
                 lastColor= qgcPal.colorGreen
             }
@@ -99,7 +93,7 @@ Item {
     //-----------------------------------------------------------------------
 
     function getAvoidLevel(proximity) {
-        if(activeVehicle.objectApmAvoidance.size === proximity  && checkProximityParameter() )  {
+        if(activeVehicle.objectApmAvoidance.size === proximity  && checkProximityParameter(proximity) )  {
             if (activeVehicle.objectApmAvoidance.orientation(proximity)===0 ){
                 lastLevel=activeVehicle.objectApmAvoidance.level(proximity)
                 if (lastLevel=== 4){
@@ -112,15 +106,21 @@ Item {
 
     //-----------------------------------------------------------------------
 
-    function getDistance(proximity) {
-        if(activeVehicle.objectApmAvoidance.size === proximity  && checkProximityParameter() )  {
-            if (activeVehicle.objectApmAvoidance.orientation(proximity)===0 ){
+    function getDistance(proximity,orientation) {
+        if(activeVehicle.objectApmAvoidance.size === proximity  && checkProximityParameter(proximity) )  {
+            if (activeVehicle.objectApmAvoidance.orientation(proximity)===orientation ){
                 lastDistance=activeVehicle.objectApmAvoidance.distance(proximity)
+                listDistProx[orientation]=lastDistance
+                return lastDistance
 
             }
 
+            return  listDistProx[orientation]
+
         }
-        return lastDistance
+
+        return false
+
     }
 
 
@@ -170,9 +170,9 @@ Item {
         40	MAV_SENSOR_ROTATION_ROLL_90_PITCH_315	Roll: 90, Pitch: 315
         100	MAV_SENSOR_ROTATION_CUSTOM	Custom orientation
       */
-    function getPrxOrientation(proximity) {
-        if(activeVehicle.objectApmAvoidance.size === proximity  && checkProximityParameter()) {
-            if (activeVehicle.objectApmAvoidance.orientation(proximity)===0 ){
+    function getPrxOrientation(proximity,orientation) {
+        if(activeVehicle.objectApmAvoidance.size === proximity  && checkProximityParameter(proximity)) {
+            if (activeVehicle.objectApmAvoidance.orientation(proximity)===orientation ){
                 switch (activeVehicle.objectApmAvoidance.orientation(proximity)){
                 case 0:
                     lastOrient="Distance Forward"
@@ -181,13 +181,16 @@ Item {
                     lastOrient="Disstance Backward"
                     break;
                 case 25:
-                    lastOrient="Ground sonar"
+                    lastOrient="Sonar"
                     break;
 
                 }
+                listTextProx[orientation]=lastOrient
+                return lastOrient
             }
         }
-        return lastOrient
+        return listTextProx[orientation]
+
     }
 
 
@@ -200,7 +203,7 @@ Item {
         x:                      Math.round((mainWindow.width  - width)  * 0.5)//0.5
         y:                      Math.round((mainWindow.height - height) * 0.8)//0.5
         radius:                 2
-        visible: getDistance(1)>=650 ? false:true
+        visible: getDistance(1,0)>=650 || !getDistance(1,0) ? false:true
 
 
 
@@ -218,7 +221,7 @@ Item {
                 Layout.alignment:       Qt.AlignVCenter | Qt.AlignHCenter
                 font.pointSize:         ScreenTools.mediumFontPointSize
                 color:                  qgcPal.text
-                text:                   getPrxOrientation(1)
+                text:                   getPrxOrientation(1,0)
 
             }
 
@@ -246,7 +249,7 @@ Item {
                 Layout.alignment:       Qt.AlignVCenter | Qt.AlignHCenter
                 font.pointSize:         ScreenTools.mediumFontPointSize
                 color:                  qgcPal.text
-                text:                    activeVehicle.objectApmAvoidance.size >0 ? getDistance(1)+" (cm) ":""
+                text:                    activeVehicle.objectApmAvoidance.size >0 ? getDistance(1,0)+" (cm) ":""
             }
 
             Repeater {
@@ -262,8 +265,54 @@ Item {
 
     }
 
+    Rectangle{
+        id:                     ground
+        color:                  qgcPal.globalTheme === QGCPalette.Light ? Qt.rgba(1,1,1,0.95) : Qt.rgba(0,0,0,0.0)//0.3
+        width:                  groundGrid.width *2
+        height:                 groundGrid.height
+        x:                      Math.round((mainWindow.width  - width)  * 0.9)//0.5
+        y:                      Math.round((mainWindow.height - height) * 0.8)//0.5
+        radius:                 2
+        visible: getDistance(1,25)>=650 || !getDistance(1,25) ? false:true
+
+        Grid {
+            id:                    groundGrid
+            columnSpacing:         1
+            rowSpacing:            1
+            columns:               1
+            anchors.centerIn:      parent
+            visible:true //  !mainIsMap
+
+            Rectangle {
+                visible: getDistance(1,25)>=650 || !getDistance(1,25) ? false:true
+                QGCColoredImage {
+                    height:                 _indicatorsHeight
+                    width:                  height
+                    source:                 "/custom/img/sonar.svg"
+                    fillMode:               Image.PreserveAspectFit
+                    sourceSize.height:      height
+                    Layout.alignment:       Qt.AlignVCenter | Qt.AlignHCenter
+                    //color:                  "black"
+               }
+
+            }
+
+
+            QGCLabel {
+                height:                 _indicatorsHeight
+                width:                  height
+                Layout.alignment:       Qt.AlignVCenter | Qt.AlignHCenter
+                font.pointSize:         ScreenTools.mediumFontPointSize
+                color:                  qgcPal.text
+                text:                    activeVehicle.objectApmAvoidance.size >0 ? getDistance(1,25)+" (cm) ":""
+            }
+
+
+        }
+    }
 
 }
+
 
 
 

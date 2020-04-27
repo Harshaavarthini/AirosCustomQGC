@@ -44,7 +44,7 @@ signals:
 
 private:
     Vehicle*        _vehicle        = nullptr;
-    orientation2Fact_s _proximity[8];
+    orientation2Fact_s _proximity[9];
     QList<orientation2Fact_s> _vector;
     size_t cntMax;
 

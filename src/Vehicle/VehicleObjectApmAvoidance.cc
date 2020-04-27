@@ -23,7 +23,7 @@ VehicleObjectApmAvoidance::VehicleObjectApmAvoidance(Vehicle* vehicle, QObject* 
     _proximity[6] = { MAV_SENSOR_ROTATION_YAW_270,      0,0,0 };
     _proximity[7] = { MAV_SENSOR_ROTATION_YAW_315,      0,0,0 };
   //  _proximity[8] = { MAV_SENSOR_ROTATION_PITCH_90,     0,0,0 };
-  //  _proximity[9] = { MAV_SENSOR_ROTATION_PITCH_270,    0,0,0 };
+     _proximity[8] = { MAV_SENSOR_ROTATION_PITCH_270,    0,0,0 };
      cntMax=0;
 
 
