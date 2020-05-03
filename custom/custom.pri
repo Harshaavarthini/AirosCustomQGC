@@ -112,6 +112,7 @@ HEADERS+= \
     $$QGCROOT/custom/src/AutoPilotPlugin/APM/APMSensorsComponentController.h \
     $$QGCROOT/custom/src/AutoPilotPlugin/APM/APMSubFrameComponent.h \
     $$QGCROOT/custom/src/AutoPilotPlugin/APM/APMTuningComponent.h \
+    $$QGCROOT/custom/src/AutoPilotPlugin/APM/APMSubMotorComponentController.h \
     $$QGCROOT/custom/src/FirmwarePlugin/APM/APMFirmwarePlugin.h \
     $$QGCROOT/custom/src/FirmwarePlugin/APM/APMFirmwarePluginFactory.h \
     $$QGCROOT/custom/src/FirmwarePlugin/APM/APMParameterMetaData.h \
@@ -150,6 +151,7 @@ SOURCES += \
     $$QGCROOT/custom/src/AutoPilotPlugin/APM/APMSensorsComponentController.cc \
     $$QGCROOT/custom/src/AutoPilotPlugin/APM/APMSubFrameComponent.cc \
     $$QGCROOT/custom/src/AutoPilotPlugin/APM/APMTuningComponent.cc \
+    $$QGCROOT/custom/src/AutoPilotPlugin/APM/APMSubMotorComponentController.cc \
     $$QGCROOT/custom/src/FirmwarePlugin/APM/APMFirmwarePlugin.cc \
     $$QGCROOT/custom/src/FirmwarePlugin/APM/APMFirmwarePluginFactory.cc \
     $$QGCROOT/custom/src/FirmwarePlugin/APM/APMParameterMetaData.cc \
@@ -195,6 +197,7 @@ DISTFILES += \
     $$QGCROOT/custom/src/AutoPilotPlugin/APM/APMSubMotorComponent.qml \
     $$QGCROOT/custom/src/AutoPilotPlugin/APM/APMTuningComponentCopter.qml \
     $$QGCROOT/custom/src/AutoPilotPlugin/APM/APMTuningComponentSub.qml \
+    $$QGCROOT/custom/src/AutoPilotPlugin/APM/APMSubMotorComponent \
     $$QGCROOT/custom/src/AutoPilotPlugin/APM/CMakeLists.txt \
     $$QGCROOT/custom/src/AutoPilotPlugin/APM/Images/LightsComponentIcon.png \
     $$QGCROOT/custom/src/AutoPilotPlugin/APM/Images/SubFrameComponentIcon.png \

@@ -39,8 +39,8 @@ Item {
 
     property color lastColor:qgcPal.colorGrey
 
-    property var listTextProx: ['N/A']
-    property var listDistProx: ['N/A']
+    property var listTextProx: ['']
+    property var listDistProx: ['']
 
 
     Connections {
@@ -49,7 +49,9 @@ Item {
 
         }
         onActiveChanged: {
-            checkProximityParameter()
+            //checkProximityParameter()
+
+
         }
 
 
@@ -64,7 +66,7 @@ Item {
 
     function checkProximityParameter(proximity){
         if (activeVehicle.objectApmAvoidance.size >0 ){
-            maxdistance=activeVehicle.objectApmAvoidance.maxdistance(proximity)
+            maxdistance=activeVehicle.objectApmAvoidance.maxDistance(proximity)
             return true
         }else{
             return false
@@ -203,7 +205,7 @@ Item {
         x:                      Math.round((mainWindow.width  - width)  * 0.5)//0.5
         y:                      Math.round((mainWindow.height - height) * 0.8)//0.5
         radius:                 2
-        visible: getDistance(1,0)>=650 || !getDistance(1,0) ? false:true
+        visible: getDistance(1,0)>=maxdistance || !getDistance(1,0) ? false:true
 
 
 
@@ -273,7 +275,7 @@ Item {
         x:                      Math.round((mainWindow.width  - width)  * 0.9)//0.5
         y:                      Math.round((mainWindow.height - height) * 0.8)//0.5
         radius:                 2
-        visible: getDistance(1,25)>=650 || !getDistance(1,25) ? false:true
+        visible: getDistance(1,25)>=maxdistance || !getDistance(1,25) ? false:true
 
         Grid {
             id:                    groundGrid
@@ -281,10 +283,17 @@ Item {
             rowSpacing:            1
             columns:               1
             anchors.centerIn:      parent
-            visible:true //  !mainIsMap
+            visible:getDistance(1,25)>=650 || !getDistance(1,25) ? false:true //  !mainIsMap
 
-            Rectangle {
-                visible: getDistance(1,25)>=650 || !getDistance(1,25) ? false:true
+                QGCLabel {
+                    height:                 _indicatorsHeight
+                    width:                  height
+                    Layout.alignment:       Qt.AlignVCenter | Qt.AlignHCenter
+                    font.pointSize:         ScreenTools.mediumFontPointSize
+                    color:                  qgcPal.text
+                    text:                    activeVehicle.objectApmAvoidance.size >0 ? getDistance(1,25)+" (cm) ":""
+                }
+
                 QGCColoredImage {
                     height:                 _indicatorsHeight
                     width:                  height
@@ -294,18 +303,6 @@ Item {
                     Layout.alignment:       Qt.AlignVCenter | Qt.AlignHCenter
                     //color:                  "black"
                }
-
-            }
-
-
-            QGCLabel {
-                height:                 _indicatorsHeight
-                width:                  height
-                Layout.alignment:       Qt.AlignVCenter | Qt.AlignHCenter
-                font.pointSize:         ScreenTools.mediumFontPointSize
-                color:                  qgcPal.text
-                text:                    activeVehicle.objectApmAvoidance.size >0 ? getDistance(1,25)+" (cm) ":""
-            }
 
 
         }

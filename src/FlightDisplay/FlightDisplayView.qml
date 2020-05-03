@@ -50,7 +50,7 @@ Item {
     property bool   _isPipVisible:                  QGroundControl.videoManager.hasVideo ? QGroundControl.loadBoolGlobalSetting(_PIPVisibleKey, true) : false
     property bool   _useChecklist:                  QGroundControl.settingsManager.appSettings.useChecklist.rawValue && QGroundControl.corePlugin.options.preFlightChecklistUrl.toString().length
     property bool   _enforceChecklist:              _useChecklist && QGroundControl.settingsManager.appSettings.enforceChecklist.rawValue
-    property bool   _canArm:                        activeVehicle ? (_useChecklist ? (_enforceChecklist ? activeVehicle.checkListState === Vehicle.CheckListPassed : true) : true) : false
+    property bool   _checklistComplete:             activeVehicle && (activeVehicle.checkListState === Vehicle.CheckListPassed)
     property real   _margins:                       ScreenTools.defaultFontPixelWidth / 2
     property real   _pipSize:                       mainWindow.width * 0.2
     property alias  _guidedController:              guidedActionsController
@@ -69,6 +69,20 @@ Item {
     readonly property string    _showMapBackgroundKey:  "/showMapBackground"
     readonly property string    _mainIsMapKey:          "MainFlyWindowIsMap"
     readonly property string    _PIPVisibleKey:         "IsPIPVisible"
+
+    Timer {
+        id:             checklistPopupTimer
+        interval:       1000
+        repeat:         false
+        onTriggered: {
+            if (visible && !_checklistComplete) {
+                checklistDropPanel.open()
+            }
+            else {
+                checklistDropPanel.close()
+            }
+        }
+    }
 
     function setStates() {
         QGroundControl.saveBoolGlobalSetting(_mainIsMapKey, mainIsMap)
@@ -100,6 +114,12 @@ Item {
             }
         }
         return true;
+    }
+
+    function showPreflightChecklistIfNeeded () {
+        if (activeVehicle && !_checklistComplete && _enforceChecklist) {
+            checklistPopupTimer.restart()
+        }
     }
 
     Connections {
@@ -548,8 +568,15 @@ Item {
             anchors.right:      isInstrumentRight() ? undefined : _mapAndVideo.right
             anchors.topMargin:  (parent.height/2)- (toolStrip.height/2)  //_toolsMargin + mainWindow.height / 2 -ToolStrip.height
             anchors.top:        parent.top
+
             z:                  _mapAndVideo.z + 6
             maxHeight:          parent.height - toolStrip.y// + (_flightVideo.visible ? (_flightVideo.y - parent.height) : 0)
+
+            /* Stable 4.0
+            z:                  _mapAndVideo.z + 4
+            maxHeight:          parent.height - toolStrip.y + (_flightVideo.visible ? (_flightVideo.y - parent.height) : 0)
+            title:              qsTr("Fly")
+            */
 
             property bool _anyActionAvailable: _guidedController.showStartMission || _guidedController.showResumeMission || _guidedController.showChangeAlt || _guidedController.showLandAbort
             property var _actionModel: [
@@ -571,17 +598,15 @@ Item {
                     action:     _guidedController.actionChangeAlt,
                     visible:    _guidedController.showChangeAlt
                 },
-            // master
+                {
+                    title:      _guidedController.landAbortTitle,
+                    text:       _guidedController.landAbortMessage,
+                    action:     _guidedController.actionLandAbort,
+                    visible:    _guidedController.showLandAbort
                 }
             ]
 
             model: [
-                /*{
-                    name:               "Plan",
-                    iconSource:         "/qmlimages/Plan.svg",
-                    buttonVisible:      true,
-                    buttonEnabled:      true,
-                },*/
                 {
                     name:               "Checklist",
                     iconSource:         "/qmlimages/check.svg",
@@ -592,7 +617,7 @@ Item {
                     name:               _guidedController.takeoffTitle,
                     iconSource:         "/res/takeoff.svg",
                     buttonVisible:      _guidedController.showTakeoff || !_guidedController.showLand,
-                    buttonEnabled:      _guidedController.showTakeoff && _canArm,
+                    buttonEnabled:      _guidedController.showTakeoff,
                     action:             _guidedController.actionTakeoff
                 },
                 {
@@ -619,20 +644,16 @@ Item {
                 {
                     name:               qsTr("Action"),
                     iconSource:         "/res/action.svg",
-                    buttonVisible:      !_guidedController.showPause,
-                    buttonEnabled:      _anyActionAvailable && _canArm,
+                    buttonVisible:      _anyActionAvailable,
                     action:             -1
                 }
             ]
 
             onClicked: {
-                guidedActionsController.closeAll()
-                /*if(index === 0) {
-                    mainWindow.showPlanView()
-                } else*/
                 if(index === 0) {
                     checklistDropPanel.open()
                 } else {
+                    guidedActionsController.closeAll()
                     var action = model[index].action
                     if (action === -1) {
                         guidedActionList.model   = _actionModel
@@ -654,7 +675,7 @@ Item {
             z:                  _flightVideoPipControl.z + 1
 
             onShowStartMissionChanged: {
-                if (showStartMission && _canArm) {
+                if (showStartMission) {
                     confirmAction(actionStartMission)
                 }
             }
@@ -775,9 +796,22 @@ Item {
             color:      Qt.rgba(0,0,0,0)
             clip:       true
         }
+
         Loader {
             id:         checkList
             anchors.centerIn: parent
+        }
+
+        property alias checkListItem: checkList.item
+
+        Connections {
+            target: checkList.item
+            onAllChecksPassedChanged: {
+                if (target.allChecksPassed)
+                {
+                    checklistPopupTimer.restart()
+                }
+            }
         }
     }
 

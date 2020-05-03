@@ -1,6 +1,6 @@
 /****************************************************************************
  *
- *   (c) 2009-2016 QGROUNDCONTROL PROJECT <http://www.qgroundcontrol.org>
+ * (c) 2009-2020 QGROUNDCONTROL PROJECT <http://www.qgroundcontrol.org>
  *
  * QGroundControl is licensed according to the terms in the file
  * COPYING.md in the root of the source code directory.
@@ -25,7 +25,10 @@ public:
         STEERING        = 3,
         HOLD            = 4,
         LOITER          = 5,
+#if 0
+    // Follow me not ready for Stable
         FOLLOW          = 6,
+#endif
         SIMPLE          = 7,
         AUTO            = 10,
         RTL             = 11,
@@ -53,7 +56,10 @@ public:
     bool    supportsNegativeThrust                  (Vehicle *) final;
     bool    supportsSmartRTL                        (void) const override { return true; }
     QString offlineEditingParamFile                 (Vehicle* vehicle) override { Q_UNUSED(vehicle); return QStringLiteral(":/FirmwarePlugin/APM/Rover.OfflineEditing.params"); }
+#if 0
+    // Follow me not ready for Stable
     void    sendGCSMotionReport                     (Vehicle* vehicle, FollowMe::GCSMotionReport& motionReport, uint8_t estimatationCapabilities) override;
+#endif
 
 private:
     static bool _remapParamNameIntialized;
