@@ -36,7 +36,7 @@ Item {
             id:                     flightModeSelector
             text:                   activeVehicle ? activeVehicle.flightMode : qsTr("N/A")
             color:                  qgcPal.text
-            font.pointSize:         ScreenTools.largeFontPointSize
+            font.pointSize:         ScreenTools.mediumFontPointSize
             anchors.verticalCenter:     parent.verticalCenter
         }
         QGCColoredImage {
@@ -72,7 +72,7 @@ Item {
             anchors.fill:       parent
             color:              qgcPal.globalTheme === QGCPalette.Light ? Qt.rgba(1,1,1,0.95) : Qt.rgba(0,0,0,0.75) //0.75
             border.color:       qgcPal.window // qgcPal.text
-            radius:             ScreenTools.defaultFontPixelWidth
+            radius:             ScreenTools.defaultFontPixelWidth *0.5
             width:              comboListCol.width  + (ScreenTools.defaultFontPixelWidth  * 3.5)  //New
             height:             comboListCol.height + (ScreenTools.defaultFontPixelHeight * 1.5) //New
 
@@ -81,7 +81,6 @@ Item {
         GridLayout {
             id:                 comboListCol
             anchors.fill:       parent
-
             columnSpacing:          ScreenTools.defaultFontPixelWidth  * 2  //1.5
             rowSpacing:             ScreenTools.defaultFontPixelHeight * 1  //0.5
             //spacing:            ScreenTools.defaultFontPixelHeight

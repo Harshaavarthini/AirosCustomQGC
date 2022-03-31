@@ -18,8 +18,9 @@ import QGroundControl.Controls      1.0
 Rectangle {
     id:         _root
    // color:      qgcPal.globalTheme === QGCPalette.Light ? QGroundControl.corePlugin.options.toolbarBackgroundLight : QGroundControl.corePlugin.options.toolbarBackgroundDark
-    color:        qgcPal.globalTheme === QGCPalette.Light ? Qt.rgba(1,1,1,0.95) : Qt.rgba(0,0,0,0.75)
-    width:      _idealWidth < repeater.contentWidth ? repeater.contentWidth : _idealWidth * 1.5
+   color:        qgcPal.globalTheme === QGCPalette.Light ? Qt.rgba(1,1,1,0.95) : Qt.rgba(0,0,0,0.75)
+   // color:                  qgcPal.globalTheme === QGCPalette.Light ? Qt.rgba(1,1,1,0.95) : Qt.rgba(0,0,0,0.2)//0.3
+    width:      _idealWidth < repeater.contentWidth ? repeater.contentWidth : _idealWidth * 1.3
     height:     Math.min(maxHeight, toolStripColumn.height + (flickable.anchors.margins * 2))
     radius:     ScreenTools.defaultFontPixelWidth / 2
 

@@ -22,7 +22,7 @@ import QGroundControl.Palette               1.0
 
 Item {
     anchors.fill: parent
-    readonly property real _indicatorMargins: ScreenTools.defaultFontPixelHeight * 0.75
+    readonly property real _indicatorMargins: ScreenTools.defaultFontPixelHeight * 1.2
     Component.onCompleted: {
         if(QGroundControl.pairingManager) {
             if(!activeVehicle) {
@@ -91,14 +91,15 @@ Item {
         }
     }
     //-------------------------------------------------------------------------
-    //-- Toolbar Indicators
+    //-- Toolbar Indicators icons
+
     Row {
         id:                         indicatorRow
         anchors.top:                parent.top
         anchors.bottom:             parent.bottom
         anchors.right:              parent.right
         anchors.rightMargin:        ScreenTools.defaultFontPixelWidth * 2
-        spacing:                    ScreenTools.defaultFontPixelWidth * 2
+        spacing:                    ScreenTools.defaultFontPixelWidth * 1
         visible:                    activeVehicle && !communicationLost
         Repeater {
             model:                  activeVehicle ? activeVehicle.toolBarIndicators : []
@@ -120,4 +121,9 @@ Item {
             source:                 "/toolbar/MessageIndicator.qml"
         }
     }
+
+
+
+
+
 }

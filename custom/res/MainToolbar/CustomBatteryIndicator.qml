@@ -169,6 +169,22 @@ Item {
     }
 
 
+    //---------------------------------------------------------------------
+        function consumedMha(battery){
+            var _temp="Na"
+             if (battery && battery.mahConsumed.value !== -1){
+                 CustomBattery.batt=battery;
+                 checkBatteryParameter()
+                 // To fix: ano cellCount ??
+                 //CustomBattery.cellNumber= activeVehicle.battery ? activeVehicle.battery.cellCount.value : 0
+                 _temp=battery.mahConsumed.valueString + " " + battery.mahConsumed.units
+
+             }
+             return _temp
+
+        }
+
+
 
     // Popup window show Battery info
     Component {
@@ -177,8 +193,8 @@ Item {
 
 
         Rectangle {
-            width:  battCol.width   + ScreenTools.defaultFontPixelWidth  * 7//3
-            height: battCol.height  + ScreenTools.defaultFontPixelHeight * 7//2
+            width:  battCol.width   + ScreenTools.defaultFontPixelWidth  * 3//3
+            height: battCol.height  + ScreenTools.defaultFontPixelHeight * 3//2
             radius: ScreenTools.defaultFontPixelHeight * 0.5
             color:  qgcPal.window
             border.color:   qgcPal.text
@@ -204,7 +220,7 @@ Item {
                     anchors.margins:    ScreenTools.defaultFontPixelHeight
                     columnSpacing:      ScreenTools.defaultFontPixelWidth
                     rowSpacing:         ScreenTools.defaultFontPixelWidth*2
-                    columns:            2
+                    columns:            6
                     //anchors.horizontalCenter: parent.horizontalCenter
 
                     QGCLabel {
@@ -279,9 +295,6 @@ Item {
                     }
 
 
-
-
-
                     // Secondary battery
                     Item {
                         width:  1
@@ -317,6 +330,7 @@ Item {
                     QGCLabel { text: (battery2 && battery2.voltage.value !== -1) ? (battery2.voltage.valueString + " " + battery2.voltage.units) : "N/A";  visible: hasSecondBattery; }
                     QGCLabel { text: qsTr("Accumulated Consumption:"); visible: hasSecondBattery; }
                     QGCLabel { text: (battery2 && battery2.mahConsumed.value !== -1) ? (battery2.mahConsumed.valueString + " " + battery2.mahConsumed.units) : "N/A"; visible: hasSecondBattery; }
+
                 }
             }
         }
@@ -327,6 +341,7 @@ Item {
         id:             batteryIndicatorRow
         anchors.top:    parent.top
         anchors.bottom: parent.bottom
+        anchors.left:     parent.left
         opacity:        (activeVehicle && activeVehicle.battery.voltage.value >= 0) ? 1 : 0.5
         spacing:        ScreenTools.defaultFontPixelWidth
         QGCColoredImage {
@@ -351,21 +366,30 @@ Item {
         QGCLabel {
             id:                     labelLevel
             text:                   cellLevel(battery1)
-            font.pointSize:         ScreenTools.largeFontPointSize
+            font.pointSize:         ScreenTools.mediumFontPointSize
             color:                  imagePercent.color
-            //anchors.top:            parent.top
-            anchors.verticalCenter: parent.verticalCenter
+            anchors.top:            parent.top
+            visible:                CustomBattery.showFeatures
+        }
+
+        QGCLabel {
+            text:                   cellVoltage(battery1)
+            font.pointSize:         ScreenTools.mediumFontPointSize
+            font.capitalization: Font.AllUppercase
+            color:                  labelLevel.color
+            anchors.top:             parent.top
             visible:                CustomBattery.showFeatures
         }
         QGCLabel {
-            text:                   cellVoltage(battery1)
-            font.pointSize:         ScreenTools.largeFontPointSize
-            font.capitalization: Font.AllUppercase
+            text:                   consumedMha(battery1)
+            font.pointSize:         ScreenTools.mediumFontPointSize
             color:                  labelLevel.color
-            //anchors.top:            parent.top
-            anchors.verticalCenter: parent.verticalCenter
-            visible:                CustomBattery.showFeatures
+            anchors.top:            parent.top
+            visible:                true
         }
+
+
+
         onPositioningComplete:{
             if (activeVehicle){
                 checkBatteryParameter()

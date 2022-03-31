@@ -99,13 +99,13 @@ Item {
             anchors.top:                    parent.top
             anchors.bottom:                 parent.bottom
             source:                         "/custom/CustomMultiVehicleSelector.qml"
-            visible:                        activeVehicle && !inPlanView
+            visible:                        false//activeVehicle && !inPlanView
         }
         Rectangle {
             width:                          1
             height:                         parent.height
             color:                          menuSeparatorColor
-            visible:                        activeVehicle && !inPlanView
+            visible:                        false//activeVehicle && !inPlanView
         }
         //-------------------------------------------------------------------------
         //-- Flight Mode
@@ -115,26 +115,48 @@ Item {
             source:                         "/custom/CustomModeIndicator.qml"
             visible:                        activeVehicle && !inPlanView
         }
+        Rectangle {
+            width:                          1
+            height:                         parent.height
+            color:                          menuSeparatorColor
+            visible:                        activeVehicle && !inPlanView
+        }
+        //-------------------------------------------------------------------------
+        //-- Arm/Disarm
+        Loader {
+            anchors.top:                        parent.top
+            anchors.bottom:                     parent.bottom
+            //anchors.horizontalCenter:           parent.horizontalCenter
+            source:                             "/custom/CustomArmedIndicator.qml"
+            visible:                            activeVehicle && !inPlanView
+        }
+        Rectangle {
+            id: _r
+            width:                          1
+            height:                         parent.height
+            color:                          menuSeparatorColor
+            visible:                        activeVehicle && !inPlanView
+        }
+
+
+
     }
-    //-------------------------------------------------------------------------
-    //-- Arm/Disarm
-    Loader {
-        anchors.top:                        parent.top
-        anchors.bottom:                     parent.bottom
-        anchors.horizontalCenter:           parent.horizontalCenter
-        source:                             "/custom/CustomArmedIndicator.qml"
-        visible:                            activeVehicle && !inPlanView
-    }
+
+
     //-------------------------------------------------------------------------
     // Indicators
     Loader {
         source:                             inPlanView ? "/qml/PlanToolBarIndicators.qml" : "/custom/CustomMainToolBarIndicators.qml"
         anchors.left:                       iconRow.right
-        anchors.leftMargin:                 ScreenTools.defaultFontPixelWidth * 2
+        anchors.leftMargin:                 ScreenTools.defaultFontPixelWidth * 10
         anchors.right:                      parent.right
         anchors.top:                        parent.top
         anchors.bottom:                     parent.bottom
     }
+
+
+
+
     //-------------------------------------------------------------------------
     // Parameter download progress bar
     /*

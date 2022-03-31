@@ -52,6 +52,15 @@ Item {
       }
     }
 
+    function getGPSCount(){
+    if(!activeVehicle){
+        return "-";
+          }else {
+        return activeVehicle.gps.count.valueString;
+
+    }
+    }
+
     // Window info
     Component {
         id: gpsInfo
@@ -103,6 +112,7 @@ Item {
         id:             gpsRow
         anchors.top:    parent.top
         anchors.bottom: parent.bottom
+        anchors.left:     parent.left
         spacing:        ScreenTools.defaultFontPixelWidth * 0.25
         QGCColoredImage {
             width:              height
@@ -114,6 +124,12 @@ Item {
             fillMode:           Image.PreserveAspectFit
             opacity:            1//getGPSSignal() > 0 ? 1 : 0.5
         }
+        QGCLabel {
+            text:                   getGPSCount()
+            font.pointSize:         ScreenTools.mediumFontPointSize
+            color:              getGPSLock() ? qgcPal.colorGreen:qgcPal.warningText
+            anchors.top:            parent.top
+         }
        /* CustomSignalStrength {
             anchors.verticalCenter: parent.verticalCenter
             size:                   parent.height * 0.75

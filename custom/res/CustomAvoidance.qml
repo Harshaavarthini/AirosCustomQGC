@@ -199,7 +199,7 @@ Item {
 
     Rectangle{
         id:                     avoid
-        color:                  qgcPal.globalTheme === QGCPalette.Light ? Qt.rgba(1,1,1,0.95) : Qt.rgba(0,0,0,0.0)//0.3
+        color:                  qgcPal.globalTheme === QGCPalette.Light ? Qt.rgba(0,0,0,0.0) : Qt.rgba(0,0,0,0.0)//0.3
         width:                  avoidGrid.width *2
         height:                 avoidGrid.height
         x:                      Math.round((mainWindow.width  - width)  * 0.5)//0.5
@@ -269,7 +269,7 @@ Item {
 
     Rectangle{
         id:                     ground
-        color:                  qgcPal.globalTheme === QGCPalette.Light ? Qt.rgba(1,1,1,0.95) : Qt.rgba(0,0,0,0.0)//0.3
+        color:                  qgcPal.globalTheme === QGCPalette.Light ? Qt.rgba(0,0,0,0.0): Qt.rgba(0,0,0,0.0)//0.3
         width:                  groundGrid.width *2
         height:                 groundGrid.height
         x:                      Math.round((mainWindow.width  - width)  * 0.9)//0.5

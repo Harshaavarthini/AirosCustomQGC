@@ -23,7 +23,7 @@ import QGroundControl.ScreenTools           1.0
 Rectangle {
     anchors.top:                    parent.top
     anchors.bottom:                 parent.bottom
-    width:                          labelRow.width + (ScreenTools.defaultFontPixelWidth * 6)
+    width:                          labelRow.width //+ (ScreenTools.defaultFontPixelWidth * 6)
     color:                          qgcPal.windowShade
 
     property bool _armed:           activeVehicle ? activeVehicle.armed : false
@@ -36,7 +36,7 @@ Rectangle {
             id:                     labelText
             text:                   _armed ? qsTr("Armed") : qsTr("Disarmed")
             color:                  qgcPal.text
-            font.pointSize:         ScreenTools.largeFontPointSize
+            font.pointSize:         ScreenTools.mediumFontPointSize
             anchors.verticalCenter: parent.verticalCenter
         }
         Rectangle {
