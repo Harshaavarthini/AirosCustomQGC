@@ -294,7 +294,7 @@ Item {
                     text:                    activeVehicle.objectApmAvoidance.size >0 ? getDistance(1,25)+" (cm) ":""
                 }
 
-                QGCColoredImage {
+                /*QGCColoredImage {
                     height:                 _indicatorsHeight
                     width:                  height
                     source:                 "/custom/img/sonar.svg"
@@ -303,6 +303,7 @@ Item {
                     Layout.alignment:       Qt.AlignVCenter | Qt.AlignHCenter
                     //color:                  "black"
                }
+               */
 
 
         }

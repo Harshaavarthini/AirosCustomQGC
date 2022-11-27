@@ -105,6 +105,7 @@ Item {
     }
 
 
+
     Timer {
         id:        connectionTimer
         interval:  5000
@@ -214,7 +215,7 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
                 x:              visible ? ((modelData * (compassBar.width / 360)) - (width * 0.5)) : 0
                 visible:        _angle % 45 == 0
-                color:          "#75505565"
+                color:          "transparent"
                 font.pointSize: ScreenTools.smallFontPointSize
                 text: {
                     switch(_angle) {
@@ -236,7 +237,7 @@ Item {
         id:                         headingIndicator
         height:                     ScreenTools.defaultFontPixelHeight
         width:                      ScreenTools.defaultFontPixelWidth * 4
-        color:                      qgcPal.windowShadeDark
+        color:                      "transparent"//qgcPal.windowShadeDark
         visible:                    false //!mainIsMap
         anchors.bottom:             compassBar.top
         anchors.bottomMargin:       ScreenTools.defaultFontPixelHeight * -0.1
@@ -525,7 +526,7 @@ Item {
         height:                 testStatusGrid.height + (ScreenTools.defaultFontPixelHeight * 2.5)//1.5
         radius:                 2
         x:                      Math.round((mainWindow.width  - width)  * 0.5)//0.5
-        y:                      Math.round((mainWindow.height - height) * 0.8)//0.5
+        y:                      Math.round((mainWindow.height - height) * 0.9)//0.8
         //anchors.top:            battTimeLoader.top
         //anchors.topMargin:      ScreenTools.defaultFontPixelHeight * (_airspaceIndicatorVisible  ? 3 : 1.3)//
         //anchors.left:           vehicleIndicator.left
@@ -586,12 +587,12 @@ Item {
             radius:             height * 0.5
             border.color:       qgcPal.text
             border.width:       1
-            color:              Qt.rgba(1,1,1,0.95)
+            color:              Qt.rgba(0,0,0,0)//changed
             anchors.centerIn:   vehicleIndicator
             visible:            true
         }
         //-- North Label
-        Rectangle {
+        /*Rectangle {
             height:             mainIsMap ? ScreenTools.defaultFontPixelHeight * 0.75 : ScreenTools.defaultFontPixelHeight * 0.75
             width:              mainIsMap ? ScreenTools.defaultFontPixelWidth  * 2 : ScreenTools.defaultFontPixelWidth  * 2
             radius:             ScreenTools.defaultFontPixelWidth  * 0.25
@@ -601,12 +602,12 @@ Item {
             anchors.topMargin:  ScreenTools.defaultFontPixelHeight * -0.25
             anchors.horizontalCenter: _circle.horizontalCenter
             QGCLabel {
-                text:               "N"
+                //text:               "N"
                 color:              qgcPal.mapWidgetBorderDark
                 font.pointSize:     ScreenTools.mediumFontPointSize
                 anchors.centerIn:   parent
             }
-        }
+        }*/
         //-- Needle
         Image {
             id:                 compassNeedle
@@ -654,7 +655,7 @@ Item {
 
         Rectangle {
             color:                  qgcPal.globalTheme === QGCPalette.Light ? Qt.rgba(1,1,1,0.95) : Qt.rgba(0,0,0,0)
-            width:                  0//attitudeIndicator.width * 1 //0.5
+            width:                  attitudeIndicator.width * 1 //0.5//0
             height:                 parent.height
             visible:                CustomQuickInterface.showAttitudeWidget
             anchors.centerIn:   parent

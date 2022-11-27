@@ -50,8 +50,8 @@ void QGCPalette::_buildMap()
 {
     //                                      Light                 Dark
     //                                      Disabled   Enabled    Disabled   Enabled
-    DECLARE_QGC_COLOR(window,               "#ffffff", "#ffffff", "#222222", "#222222")
-    DECLARE_QGC_COLOR(windowShade,          "#d9d9d9", "#d9d9d9", "#333333", "#333333")
+    DECLARE_QGC_COLOR(window,               "#ffffff", "#ffffff", "#222222", "#121212")
+    DECLARE_QGC_COLOR(windowShade,          "#d9d9d9", "#121212", "#333333", "#202A44")
     DECLARE_QGC_COLOR(windowShadeDark,      "#bdbdbd", "#bdbdbd", "#282828", "#282828")
     DECLARE_QGC_COLOR(text,                 "#9d9d9d", "#000000", "#707070", "#ffffff")
     DECLARE_QGC_COLOR(warningText,          "#cc0808", "#cc0808", "#f85761", "#f85761")
@@ -84,8 +84,8 @@ void QGCPalette::_buildMap()
     // Colors are not affecting by theming
     DECLARE_QGC_COLOR(mapWidgetBorderLight, "#ffffff", "#ffffff", "#ffffff", "#ffffff")
     DECLARE_QGC_COLOR(mapWidgetBorderDark,  "#000000", "#000000", "#000000", "#000000")
-    DECLARE_QGC_COLOR(brandingPurple,       "#4A2C6D", "#4A2C6D", "#4A2C6D", "#4A2C6D")
-    DECLARE_QGC_COLOR(brandingBlue,         "#48D6FF", "#6045c5", "#48D6FF", "#6045c5")
+    DECLARE_QGC_COLOR(brandingPurple,       "#670e10", "#670e10", "#670e10", "#670e10")
+    DECLARE_QGC_COLOR(brandingBlue,         "#670e10", "#670e10", "#670e10", "#670e10")
 }
 
 void QGCPalette::setColorGroupEnabled(bool enabled)

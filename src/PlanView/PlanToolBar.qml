@@ -20,7 +20,7 @@ Rectangle {
         anchors.right:  parent.right
         anchors.bottom: parent.bottom
         height:         1
-        color:          "black"
+        color:          "transparent" //black
         visible:        qgcPal.globalTheme === QGCPalette.Light
     }
     RowLayout {

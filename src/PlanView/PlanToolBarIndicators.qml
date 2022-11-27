@@ -30,7 +30,7 @@ Item {
     property bool   _statusValid:               _currentMissionItem !== undefined && _currentMissionItem !== null
     property bool   _missionValid:              missionItems !== undefined
 
-    property real   _dataFontSize:              ScreenTools.defaultFontPointSize
+    property real   _dataFontSize:              ScreenTools.defaultFontPointSize * 1.5
     property real   _largeValueWidth:           ScreenTools.defaultFontPixelWidth * 8
     property real   _mediumValueWidth:          ScreenTools.defaultFontPixelWidth * 4
     property real   _smallValueWidth:           ScreenTools.defaultFontPixelWidth * 3
@@ -113,7 +113,9 @@ Item {
         anchors.left:           parent.left
         anchors.right:          uploadButton.visible ? uploadButton.left : parent.right
         columnSpacing:          0
-        columns:                3
+        columns:   3
+
+        /*
 
         GridLayout {
             columns:                8
@@ -168,20 +170,21 @@ Item {
                 Layout.minimumWidth:    _smallValueWidth
             }
         }
+        */
 
         GridLayout {
-            columns:                5
+            columns:                12
             rowSpacing:             _rowSpacing
             columnSpacing:          _labelToValueSpacing
             Layout.alignment:       Qt.AlignVCenter | Qt.AlignHCenter
 
             QGCLabel {
-                text:               qsTr("Total Mission")
-                Layout.columnSpan:  5
-                font.pointSize:     ScreenTools.smallFontPointSize
+                text:               qsTr("  Total Mission    ")
+                Layout.columnSpan:  1
+                font.pointSize:     ScreenTools.smallFontPointSize *2
             }
 
-            QGCLabel { text: qsTr("Distance:"); font.pointSize: _dataFontSize; }
+            QGCLabel { text: qsTr(" Distance:"); font.pointSize: _dataFontSize; }
             QGCLabel {
                 text:                   _missionDistanceText
                 font.pointSize:         _dataFontSize
@@ -190,7 +193,7 @@ Item {
 
             Item { width: 1; height: 1 }
 
-            QGCLabel { text: qsTr("Max telem dist:"); font.pointSize: _dataFontSize; }
+            QGCLabel { text: qsTr(" Max telem dist:"); font.pointSize: _dataFontSize; }
             QGCLabel {
                 text:                   _missionMaxTelemetryText
                 font.pointSize:         _dataFontSize

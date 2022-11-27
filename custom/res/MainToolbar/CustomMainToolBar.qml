@@ -138,8 +138,6 @@ Item {
             visible:                        activeVehicle && !inPlanView
         }
 
-
-
     }
 
 

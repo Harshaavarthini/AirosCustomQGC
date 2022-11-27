@@ -63,8 +63,8 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         QGCColoredImage {
             id:                 pairingIcon
-            height:             parent.height
-            width:              height
+            height:             parent.height *2
+            width:              height *2
             color:              qgcPal.text
             source:             "/custom/img/PairingIcon.svg"
             sourceSize.width:   width

@@ -571,6 +571,7 @@ Item {
             z:                  QGroundControl.zOrderWidgets
             maxHeight:          parent.height - toolStrip.y
             title:              qsTr("Plan")
+            //opacity:            0.7 //added
 
             //readonly property int flyButtonIndex:       0
             readonly property int fileButtonIndex:      0

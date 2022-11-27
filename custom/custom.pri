@@ -39,17 +39,18 @@ DEFINES += CUSTOMHEADER=\"\\\"CustomPlugin.h\\\"\"
 DEFINES += CUSTOMCLASS=CustomPlugin
 
 TARGET   = CustomQGC
-DEFINES += QGC_APPLICATION_NAME=\"\\\"CustomQGC\\\"\"
+DEFINES += QGC_APPLICATION_NAME=\"\\\"AirosQGC\\\"\"
 
-DEFINES += QGC_ORG_NAME=\"\\\"qgroundcontrol.org\\\"\"
-DEFINES += QGC_ORG_DOMAIN=\"\\\"org.qgroundcontrol\\\"\"
+DEFINES += QGC_ORG_NAME=\"\\\"airos\\\"\"
+DEFINES += QGC_ORG_DOMAIN=\"\\\"https://airosspace.com/\\\"\"
 
-QGC_APP_NAME        = "Custom GS"
+QGC_APP_NAME        = "AirosGCS"
 QGC_BINARY_NAME     = "QGCCustomAPM"
-QGC_ORG_NAME        = "Custom"
-QGC_ORG_DOMAIN      = "org.qgroundcontrol"
-QGC_APP_DESCRIPTION = "Custom QGC Ground Station"
-QGC_APP_COPYRIGHT   = "Copyright (C) 2019 QGroundControl Development Team. All rights reserved."
+QGC_ORG_NAME        = "airosspace.com/"
+QGC_ORG_DOMAIN      = "https://airosspace.com/"
+QGC_APP_DESCRIPTION = "Ground Control app provided by Airosspace Dev Team"
+QGC_APP_COPYRIGHT   = "Copyright (C) 2022 Airosspace Development Team. All rights reserved."
+
 
 # Our own, custom resources
 RESOURCES += \

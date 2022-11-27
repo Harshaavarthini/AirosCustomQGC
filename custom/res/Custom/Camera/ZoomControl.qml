@@ -31,7 +31,7 @@ Item {
         id: zoomStatusItem
 
         color: mainColor
-        opacity: 0.5
+        opacity: 0//0.5
         radius: height/2
 
         anchors.left: _root.left
@@ -59,7 +59,7 @@ Item {
 
             color: _root.contentColor
 
-            text: isNaN(zoomLevel) ? "-" : "x" + _root.zoomLevel.toFixed(_root.showZoomPrecision ? 1 : 0)
+            text: isNaN(zoomLevel) ? " " : " " + _root.zoomLevel.toFixed(_root.showZoomPrecision ? 1 : 0)
         }
     }
 
@@ -190,7 +190,7 @@ Item {
 
     // Zoom buttons background
     Rectangle {
-        color: _root.mainColor
+        color: "transparent"//_root.mainColor
         z: -1
 
         anchors.left: zoomInButton.horizontalCenter
@@ -227,3 +227,6 @@ Item {
         }
     ]
 }
+
+
+
