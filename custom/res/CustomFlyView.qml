@@ -614,7 +614,7 @@ Item {
             anchors.centerIn:   _circle
             height:             mainIsMap ? _circle.height * 0.75 : _circle.height * 0.75
             width:              height
-            source:             "/resources/wind-rose.svg"
+            source:             "/res/wind-rose.svg"
             fillMode:           Image.PreserveAspectFit
             visible:            true//mainIsMap
             sourceSize.height:  height
